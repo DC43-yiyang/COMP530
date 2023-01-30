@@ -1,8 +1,5 @@
-//
-// Created by Wangjj on 2019-01-24.
-//
-
-
+#ifndef PAGE_C
+#define PAGE_C
 #include "MyDB_Page.h"
 
 char *Page::getBufferAddr() const {
@@ -81,5 +78,5 @@ pair<MyDB_TablePtr, long> Page::getPageId() {
 }
 
 
-
+#endif
 

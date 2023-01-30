@@ -1,3 +1,5 @@
+#ifndef A1_LRU_C
+#define A1_LRU_C
 #include "LRU.h"
 /*this is LRU implementaition file, used the double linked node for the page update */
 class Node;
@@ -159,3 +161,4 @@ Node::Node(Page* page){
 
 
 
+#endif
