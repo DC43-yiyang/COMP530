@@ -50,7 +50,7 @@ public:
 
 	// If buffer manager has no available space for new page.
 	// LRU needs to pop the first node of LRU and write back to disk.
-	char* evict(Page* page);  // 包含update；
+	char* evict();  // 包含update；
 
 	// If page has already existed in LRU, the page needs to be updated in LRU.
 	// Index the node according to existed page and put it back of LRU.

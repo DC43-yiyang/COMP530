@@ -6,31 +6,35 @@
 #include "MyDB_PageHandle.h"
 
 void *MyDB_PageHandleBase :: getBytes () {
-	// if page's buffer address is not nullptr, the page exists in buffer.
     if(page->getBufferAddr() != nullptr) {
+		// std::cout << "###########NYY########### this page is already in the LRU list FILE: " __FILE__ "， LINE: " << __LINE__ << " ，Function: " << __FUNCTION__ << std::endl;
 
-		// Update the position of node in LRU
-	    buffer->update(page);
+		// which indicates that this page is already in the LRU list
+		// we need to update the position of node in LRU, we can assume that node is the most recent node
+	    bufferManager->update(page);
         return page->getBufferAddr();
 	} 
 	else {
 
 		// If there is no available space for new page, buffer needs
 		// to evict one page and assign this space to new page.
-		if(buffer->space.empty()) {
+		if(bufferManager->space.empty()) {
+			// std::cout << "###########NYY########### space is empty FILE:" __FILE__ "， LINE: " << __LINE__ << " ，Function: " << __FUNCTION__ << std::endl;
+
 			// LRU need to evict the first one
-			char* availableAddr = buffer->evict(page);
+			char* availableAddr = bufferManager->evict();
 			page->setBufferAddr(availableAddr);
-			buffer->insert(page);
+			bufferManager->insert(page);
 		} 
 		else {
-
+			// std::cout << "###########NYY########### space available  FILE:" __FILE__ "， LINE: " << __LINE__ << " ，Function: " << __FUNCTION__ << std::endl;
 			// If buffer's space is still available, assign the available
-			// space to new page.
-		    char* addr = buffer->space.back();
-		    buffer->space.pop_back();
+			// return the last space element to add the new page.
+		    char* addr = bufferManager->space.back();
+			// remove the last element is the space
+		    bufferManager->space.pop_back();
 		    page->setBufferAddr(addr);
-			buffer->insert(page);
+			bufferManager->insert(page);
 		}
         return page->getBufferAddr();
 	}
@@ -45,7 +49,7 @@ MyDB_PageHandleBase :: ~MyDB_PageHandleBase () {
 	if(page->getHandleNum() == 0){
 		page->undoPin();
 		if(page->isIsAnonymous()){
-			this->buffer->anonymousSpace.push_back(page->getSlotId());
+			this->bufferManager->anonymousSpace.push_back(page->getSlotId());
 		}
 	}
 }
@@ -54,9 +58,9 @@ Page *MyDB_PageHandleBase::getPage() const {
 	return page;
 }
 
-MyDB_PageHandleBase::MyDB_PageHandleBase(Page *page, MyDB_BufferManager *buffer) : page(page), buffer(buffer) {
+MyDB_PageHandleBase::MyDB_PageHandleBase(Page *page, MyDB_BufferManager *buffer) : page(page), bufferManager(buffer) {
 	this->page = page;
-	this->buffer = buffer;
+	this->bufferManager = buffer;
 }
 
 #endif

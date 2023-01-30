@@ -11,28 +11,28 @@ bool Page::isDirty() const {
 }
 
 void Page::setBufferAddr(char *bufferAddr) {
-    Page::bufferAddr = bufferAddr;
+    this->bufferAddr = bufferAddr;
 }
 
 void Page::setDirty(bool dirty) {
-    Page::dirty = dirty;
+    this->dirty = dirty;
 }
 
 void Page::setPin() {
-    Page::isPin = true;
+    this->isPin = true;
 }
 
 void Page::undoPin() {
-    Page::isPin = false;
+    this->isPin = false;
 
 }
 
 void Page::addHandleNum() {
-    Page::handleNum++;
+    this->handleNum++;
 }
 
 void Page::deHandleNum() {
-    Page::handleNum--;
+    this->handleNum--;
 }
 
 Page::Page(MyDB_TablePtr whichTable, long i) {
@@ -50,7 +50,7 @@ Node *Page::getNode() const {
 }
 
 void Page::setNode(Node *node) {
-    Page::node = node;
+    this->node = node;
 }
 
 bool Page::isIsPin() const {
@@ -70,7 +70,7 @@ int Page::getSlotId() const {
 }
 
 void Page::setSlotId(int slotId) {
-    Page::slotId = slotId;
+    this->slotId = slotId;
 }
 
 pair<MyDB_TablePtr, long> Page::getPageId() {

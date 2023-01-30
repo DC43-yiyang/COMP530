@@ -44,7 +44,7 @@ public:
 
 private:
 	Page *page;
-	MyDB_BufferManager *buffer;
+	MyDB_BufferManager *bufferManager;
 
 };
 

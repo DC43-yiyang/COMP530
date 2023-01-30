@@ -14,11 +14,13 @@ MyDB_PageHandle MyDB_BufferManager :: getPage (MyDB_TablePtr whichTable, long i)
 	string str = whichTable->getName();
 	string key = str + "_"+ to_string(i);
 
-	// Check whether the page exists before
+	// to check whether the page already eists
 	if(this->map.find(key) == map.end()) {
+		// find it
 		curPage = new Page(whichTable, i);
 		this->map[key] = curPage;
 	}
+	// it doesn't exist, so add it to the map
 	curPage = map[key];
 	curPage->addHandleNum();
 	MyDB_PageHandle ph = make_shared<MyDB_PageHandleBase>(curPage, this);
@@ -110,7 +112,7 @@ MyDB_BufferManager :: ~MyDB_BufferManager () {
 	free (buffer);
 }
 
-char* MyDB_BufferManager::evict(Page* page) {
+char* MyDB_BufferManager::evict() {
 
 	// Evict one page from LRU
 	Page* outPage = lru->evict()->getPage();
@@ -129,10 +131,10 @@ char* MyDB_BufferManager::evict(Page* page) {
 
 void MyDB_BufferManager::update(Page *page) {
 
-	// get the node which needs to be updated
+	// get the node
 	Node* node = page->getNode();
 
-	// in the list find the node and move it to the tail
+	// during the LRU list to find the node and move it to the tail
 	lru->update(node); //需要去优化nyytodo
 }
 
@@ -173,18 +175,18 @@ void MyDB_BufferManager::writeToDisk(Page* page) {
 
 void MyDB_BufferManager::readFromDisk(Page *page) {
 	if (page->isIsAnonymous()) {
-		int temp = open(tempFile.c_str(),O_CREAT | O_RDWR | O_SYNC, 0666);
-		lseek(temp, page->getSlotId() * this->pageSize, SEEK_SET);
-		read(temp, page->getBufferAddr(), this->pageSize);
+		int filedescriptor = open(tempFile.c_str(),O_CREAT | O_RDWR | O_SYNC, 0666);
+		lseek(filedescriptor, page->getSlotId() * this->pageSize, SEEK_SET);
+		read(filedescriptor, page->getBufferAddr(), this->pageSize);
 		page->setDirty(false);
-		 close(temp);
+		 close(filedescriptor);
 
 	} else {
-		int table = open(page->getPageId().first->getStorageLoc().c_str(), O_CREAT | O_RDWR | O_SYNC, 0666);
-		lseek(table, page->getPageId().second * this->pageSize, SEEK_SET);
-		read(table, page->getBufferAddr(), this->pageSize);
+		int filedescriptor = open(page->getPageId().first->getStorageLoc().c_str(), O_CREAT | O_RDWR | O_SYNC, 0666);
+		lseek(filedescriptor, page->getPageId().second * this->pageSize, SEEK_SET);
+		read(filedescriptor, page->getBufferAddr(), this->pageSize);
 		page->setDirty(false);
-		close(table);
+		close(filedescriptor);
 	}
 }
 

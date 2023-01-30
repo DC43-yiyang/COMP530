@@ -5,14 +5,15 @@
 class Node;
 
 LRU::LRU(int fullSize) {
-    this->curSize = 0;
-    this->fullSize = fullSize;
+    this->curSizeNum = 0;
+    this->fullSizeCapcity = fullSize;
 }
 
 void LRU::insert(Node *node) {
-    curSize++;
-    if (curSize<=fullSize){
-        if(curSize == 1) {
+    curSizeNum++;
+    // before u insert the new page node, you need to judge at first to avoid the overflow
+    if (curSizeNum<=fullSizeCapcity){
+        if(curSizeNum == 1) {
             head = node;
             tail = node;
         } else {
@@ -20,6 +21,11 @@ void LRU::insert(Node *node) {
             node->setPre(tail);
             tail = node;
         }
+    }
+    else{
+        std::cout << "This is already full, do not add any node\n";
+        std::cout << "You need to use the LRU algorithm\n";
+        return;
     }
 }
 
@@ -87,7 +93,7 @@ Node* LRU::evict() {
     delete dummyHead;
     delete dummyTail;
 
-    curSize--;
+    curSizeNum--;
     return node;
 }
 
@@ -127,7 +133,7 @@ Node* LRU::finalEvict() {
     delete dummyHead;
     delete dummyTail;
 
-    curSize--;
+    curSizeNum--;
     return node;
 }
 
@@ -146,11 +152,11 @@ Node *Node::getNext() const {
 
 
 void Node::setPre(Node *pre) {
-    Node::pre = pre;
+    this->pre = pre;
 }
 
 void Node::setNext(Node *next) {
-    Node::next = next;
+    this->next = next;
 }
 
 Node::Node(Page* page){

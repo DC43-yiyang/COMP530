@@ -13,8 +13,11 @@ class Node;
 class Page {
 private:
     char* bufferAddr = nullptr;
+    // that's the place that address of page's bytes 
     int slotId = 0;
+    // use for the anoanymous page
     int handleNum = 0;
+    // record the page-handle num
     bool isAnonymous;
     bool dirty = false;
     bool isPin = false;

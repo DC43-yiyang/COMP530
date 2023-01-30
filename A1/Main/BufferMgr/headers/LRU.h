@@ -47,8 +47,10 @@ public:
 
 
 private:
-    int fullSize;
-    int curSize = 0;
+    int fullSizeCapcity;
+    // the Capcity which lru list can store 
+    int curSizeNum = 0;
+    // the number which the lru list already store
     Node* tail = nullptr;
     Node* head = nullptr;
 

@@ -50,7 +50,7 @@ int main () {
         writeNums (bytes, 64, 0);
 		pinnedPage->wroteBytes ();
 
-		
+
 		// create a bunch of pinned pages and remember them
 		vector <MyDB_PageHandle> myHandles;
 		for (int i = 1; i < 10; i++) {
