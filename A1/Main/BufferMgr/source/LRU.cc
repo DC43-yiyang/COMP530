@@ -1,5 +1,5 @@
 #include "LRU.h"
-
+/*this is LRU implementaition file, used the double linked node for the page update */
 class Node;
 
 LRU::LRU(int fullSize) {
