@@ -75,8 +75,8 @@ MyDB_BufferManager :: MyDB_BufferManager (size_t pageSize, size_t numPage, strin
 	this->numPage = numPage;
 	this->tempFile = tempFile;
 	this->map = unordered_map<string, Page*> ();
-
 	buffer = (char*) malloc(pageSize * numPage);
+	char *addr = buffer;
 
 	// Split the space into Page size and put them into a vector
 	for(int i = 0; i < numPage; i++) {
