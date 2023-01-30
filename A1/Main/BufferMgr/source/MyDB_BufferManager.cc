@@ -64,23 +64,21 @@ MyDB_PageHandle MyDB_BufferManager :: getPinnedPage () {
 	return ph;
 }
 
-void MyDB_BufferManager :: unpin (MyDB_PageHandle unpinMe) {
-	unpinMe->getPage()->undoPin();
+void MyDB_BufferManager :: unpin (MyDB_PageHandle pageHandle) {
+	pageHandle->getPage()->undoPin();
 }
 
 MyDB_BufferManager :: MyDB_BufferManager (size_t pageSize, size_t numPage, string tempFile) {
-	// Initialize the parameters
+	
 	this->lru = new LRU(numPage);
 	this->pageSize = pageSize;
 	this->numPage = numPage;
 	this->tempFile = tempFile;
 	this->map = unordered_map<string, Page*> ();
 
-	// Create an available space
 	buffer = (char*) malloc(pageSize * numPage);
 
-	// Split the space into Page size and put them into a vector to store the available space
-	char* addr = buffer;
+	// Split the space into Page size and put them into a vector
 	for(int i = 0; i < numPage; i++) {
 		space.push_back(addr);
 		addr += pageSize;
@@ -107,7 +105,6 @@ MyDB_BufferManager :: ~MyDB_BufferManager () {
 
 	delete lru;
 
-	// Delete temp file
 	remove(tempFile.c_str());
 	free (buffer);
 }
@@ -134,7 +131,7 @@ void MyDB_BufferManager::update(Page *page) {
 	// get the node
 	Node* node = page->getNode();
 
-	// during the LRU list to find the node and move it to the tail
+	// during the LRU list to find the node and move it to the head
 	lru->update(node); //需要去优化nyytodo
 }
 
@@ -156,19 +153,19 @@ void MyDB_BufferManager::insert(Page *page) {
 void MyDB_BufferManager::writeToDisk(Page* page) {
 	if (page->isIsAnonymous()) {
 		if (page->isDirty()) {
-			int temp = open(tempFile.c_str(),O_CREAT | O_RDWR | O_SYNC, 0666);
-			lseek(temp, page->getSlotId() * this->pageSize, SEEK_SET);
-			write(temp, page->getBufferAddr(), this->pageSize);
+			int filedescriptor = open(tempFile.c_str(),O_CREAT | O_RDWR | O_SYNC, 0666);
+			lseek(filedescriptor, page->getSlotId() * this->pageSize, SEEK_SET);
+			write(filedescriptor, page->getBufferAddr(), this->pageSize);
 			page->setDirty(false);
-			close(temp);
+			close(filedescriptor);
 		}
 	} else {
 		if (page->isDirty()) {
-			int table = open(page->getPageId().first->getStorageLoc().c_str(), O_CREAT | O_RDWR | O_SYNC, 0666);
-			lseek(table, page->getPageId().second * this->pageSize, SEEK_SET);
-			write(table, page->getBufferAddr(), this->pageSize);
+			int filedescriptor = open(page->getPageId().first->getStorageLoc().c_str(), O_CREAT | O_RDWR | O_SYNC, 0666);
+			lseek(filedescriptor, page->getPageId().second * this->pageSize, SEEK_SET);
+			write(filedescriptor, page->getBufferAddr(), this->pageSize);
 			page->setDirty(false);
-			close(table);
+			close(filedescriptor);
 		}
 	}
 }
