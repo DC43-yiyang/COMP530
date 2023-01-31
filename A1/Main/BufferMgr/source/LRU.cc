@@ -101,41 +101,6 @@ bool LRU::isEmpty() {
     return head == nullptr;
 }
 
-Node* LRU::finalEvict() {
-    Node* dummyHead = new Node(nullptr);
-    Node* dummyTail = new Node(nullptr);
-    head->setPre(dummyHead);
-    tail->setNext(dummyTail);
-    dummyHead->setNext(head);
-    dummyTail->setPre(tail);
-
-    Node* node = head;
-
-    Node* preNode = node->getPre();
-    Node* nextNode = node->getNext();
-
-    nextNode->setPre(preNode);
-    preNode->setNext(nextNode);
-
-    node->setNext(nullptr);
-    node->setPre(nullptr);
-
-    if (dummyHead->getNext() == dummyTail){
-        head = nullptr;
-        tail = nullptr;
-    }else{
-        head = dummyHead->getNext();
-        tail = dummyTail->getPre();
-        tail->setNext(nullptr);
-        head->setPre(nullptr);
-    }
-
-    delete dummyHead;
-    delete dummyTail;
-
-    curSizeNum--;
-    return node;
-}
 
 
 Page *Node::getPage() const {
