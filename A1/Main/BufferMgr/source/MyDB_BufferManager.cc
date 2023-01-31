@@ -44,10 +44,10 @@ MyDB_PageHandle MyDB_BufferManager :: getPage () {
 }
 
 MyDB_PageHandle MyDB_BufferManager :: getPinnedPage (MyDB_TablePtr whichTable, long i) {
-	// Get a non-anonymous page
+	// get a non-anonymous page
 	MyDB_PageHandle ph = getPage(whichTable, i);
 
-	// Set pin
+	// pin it
 	ph->getPage()->setPin();
 
     return ph;
@@ -55,10 +55,9 @@ MyDB_PageHandle MyDB_BufferManager :: getPinnedPage (MyDB_TablePtr whichTable, l
 
 MyDB_PageHandle MyDB_BufferManager :: getPinnedPage () {
 
-	// Get an anonymous page
+	// get an anonymous page
 	MyDB_PageHandle ph = getPage();
 
-	// Set Pin
 	ph->getPage()->setPin();
 
 	return ph;
@@ -111,17 +110,16 @@ MyDB_BufferManager :: ~MyDB_BufferManager () {
 
 char* MyDB_BufferManager::evict() {
 
-	// Evict one page from LRU
-	Page* outPage = lru->evict()->getPage();
+	// evict one page from LRU
+	Page* evictPage = lru->evict()->getPage();
 
-	// Write back to disk
-	writeToDisk(outPage);
+	writeToDisk(evictPage);
 
-	// Get out page's buffer address
-	char* addr = outPage->getBufferAddr();
+	// get out page's buffer address
+	char* addr = evictPage->getBufferAddr();
 
-	// Set out page's buffer address to nullptr
-	outPage->setBufferAddr(nullptr);
+	// set out page's buffer address to nullptr
+	evictPage->setBufferAddr(nullptr);
 
     return addr;
 }
@@ -136,10 +134,9 @@ void MyDB_BufferManager::update(Page *page) {
 }
 
 void MyDB_BufferManager::insert(Page *page) {
-	// Create a new node to insert
+
 	Node *node = new Node(page);
 
-	// Set page's node
 	page->setNode(node);
 
 	// insert into LRU

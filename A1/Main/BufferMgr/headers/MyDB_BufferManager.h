@@ -41,29 +41,26 @@ public:
 	// pinned in RAM; it cannot be written out to the file
 	MyDB_PageHandle getPinnedPage (MyDB_TablePtr whichTable, long i);
 
-	// gets a temporary page, like getPage (), except that this one is pinned
+	// get a temporary/anonymous page, like getPage (), except that this one is pinned
 	MyDB_PageHandle getPinnedPage ();
 
-	// un-pins the specified page
+	// un-pin the pinned page
 	void unpin (MyDB_PageHandle unpinMe);
 
 
-	// If buffer manager has no available space for new page.
-	// LRU needs to pop the first node of LRU and write back to disk.
-	char* evict();  // 包含update；
+	// If there is no available space for uffer manager to add new.
+	// LRU needs to pop the tail node and write it back to disk.
+	char* evict();
 
-	// If page has already existed in LRU, the page needs to be updated in LRU.
+	// If the page already exists in LRU, it should be updated in LRU.
 	// Index the node according to existed page and put it back of LRU.
 	void update(Page* page);
 
-	// 1. Read from disk and set the information into buffer address.
-	// 2. Insert a new node into back of LRU
+	//  Insert a new node into head of LRU
 	void insert(Page* page);
 
-	// Write anonymous and non-anonymous page back to table or temp file.
 	void readFromDisk(Page *page);
 
-	// Read from table or temp file.
 	void writeToDisk(Page* page);
 
 	// creates an LRU buffer manager... params are as follows:
@@ -90,12 +87,12 @@ private:
 	string tempFile;
 	char* buffer;
 
-	// Use for checking the page whether it used to exist in buffer
-	// key: tableName_i
+	// checke the page whether exists in buffer
+	// key: tableName(i th)
 	// value: Page pointer
 	unordered_map<string, Page*> map;
 
-	// Decide which slot for temp file.
+	// the temp file index
 	int slotId = 0;
 
 	LRU* lru;
