@@ -17,9 +17,10 @@ void LRU::insert(Node *node) {
             head = node;
             tail = node;
         } else {
-            tail->setNext(node);
-            node->setPre(tail);
-            tail = node;
+            // this in insert at head
+            head->setPre(node);
+            node->setNext(head);
+            head = node;
         }
     }
     else{
@@ -31,11 +32,11 @@ void LRU::insert(Node *node) {
 
 void LRU::update(Node *node) {
     Node* tmpHead = new Node(nullptr);
-    Node* tempTail = new Node(nullptr);
+    Node* tmpTail = new Node(nullptr);
     head->setPre(tmpHead);
-    tail->setNext(tempTail);
+    tail->setNext(tmpTail);
     tmpHead->setNext(head);
-    tempTail->setPre(tail);
+    tmpTail->setPre(tail);
 
     Node* preNode = node->getPre();
     Node* nextNode = node->getNext();
@@ -43,28 +44,27 @@ void LRU::update(Node *node) {
     nextNode->setPre(preNode);
     preNode->setNext(nextNode);
 
-    node->setNext(tempTail);
-    node->setPre(tempTail->getPre());
+    node->setPre(tmpHead);
+    node->setNext(tmpHead->getNext());
 
-    tempTail->getPre()->setNext(node);
-    tempTail->setPre(node);
+    tmpHead->setNext(node);
+    tmpHead->getNext()->setPre(node);
 
-    head = tmpHead->getNext();
-    tail = tempTail->getPre();
-
+    head = tmpHead->getNext(); //node
+    tail = tmpTail->getPre();
     delete tmpHead;
-    delete tempTail;
+    delete tmpTail;
     tail->setNext(nullptr);
     head->setPre(nullptr);
 }
 
 Node* LRU::evict() {
-    Node* dummyHead = new Node(nullptr);
-    Node* dummyTail = new Node(nullptr);
-    head->setPre(dummyHead);
-    tail->setNext(dummyTail);
-    dummyHead->setNext(head);
-    dummyTail->setPre(tail);
+    Node* tempHead = new Node(nullptr);
+    Node* tempTail = new Node(nullptr);
+    head->setPre(tempHead);
+    tail->setNext(tempTail);
+    tempHead->setNext(head);
+    tempTail->setPre(tail);
 
     Node* node = head;
     while(node->getPage()->isIsPin()) {
@@ -80,18 +80,18 @@ Node* LRU::evict() {
     node->setNext(nullptr);
     node->setPre(nullptr);
 
-    if (dummyHead->getNext() == dummyTail){
+    if (tempHead->getNext() == tempTail){
         head = nullptr;
         tail = nullptr;
     }else{
-        head = dummyHead->getNext();
-        tail = dummyTail->getPre();
+        head = tempHead->getNext();
+        tail = tempTail->getPre();
         tail->setNext(nullptr);
         head->setPre(nullptr);
     }
 
-    delete dummyHead;
-    delete dummyTail;
+    delete tempHead;
+    delete tempTail;
 
     curSizeNum--;
     return node;
