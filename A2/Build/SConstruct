@@ -1,0 +1,68 @@
+
+from os import listdir
+from os.path import isfile, join, abspath
+
+common_env = Environment()
+common_env.Append(CXXFLAGS = '-std=c++11 -Wall -g -O0')
+
+# get the source files for the catalog
+srcDir = '../Main/Catalog/source'
+catalogSrc = [abspath(join(srcDir, f)) for f in listdir(srcDir) if isfile(join(srcDir, f)) and f[-3:] == '.cc']
+
+# get the source files for the buffer manager
+srcDir = '../Main/BufferMgr/source'
+bufferSrc = [abspath(join(srcDir, f)) for f in listdir(srcDir) if isfile(join(srcDir, f)) and f[-3:] == '.cc']
+
+# get the source files for the record manager
+srcDir = '../Main/Record/source'
+recordSrc = [abspath(join(srcDir, f)) for f in listdir(srcDir) if isfile(join(srcDir, f)) and f[-3:] == '.cc']
+
+# get the source files for the record manager
+srcDir = '../Main/DatabaseTable/source'
+tableSrc = [abspath(join(srcDir, f)) for f in listdir(srcDir) if isfile(join(srcDir, f)) and f[-3:] == '.cc']
+
+# get the headers paths
+header_paths = Split("""
+	'../Main/Catalog/headers'
+	'../Main/BufferMgr/headers'
+	'../Main/Qunit/headers'
+	'../Main/Record/headers'
+	'../Main/DatabaseTable/headers'
+""")
+
+# adds header folders 
+common_env.Append(CPPPATH = header_paths)
+
+# Menu for selecting a specific build or all builds
+# if the -c or --clean option is included, the script will clean up
+# built and target files
+ans=True
+print("""
+What do you want to build/clean?\n
+1. Buffer unit tests
+2. Record unit tests
+3. Buffer unit tests for Clear (use clang++ compiler)
+4. Record unit tests for Clear (use clang++ compiler)
+""")
+
+ans=raw_input("Select the module(s) you want to build or clean. ")
+
+if ans=="1":
+	print("\nOK, building buffer unit tests.")
+	common_env.Program ('bin/bufferUnitTest', ['../Main/BufferTest/source/BufferQUnit.cc', catalogSrc, recordSrc, bufferSrc])
+
+if ans=="2":
+	print("\nOK, building record unit tests.")
+	common_env.Program ('bin/recordUnitTest', ['../Main/RecordTest/source/RecordQUnit.cc', tableSrc, recordSrc, catalogSrc, bufferSrc])
+
+if ans=="3":
+	print("\nOK, building buffer unit tests using clang++.")
+	common_env.Replace(CXX = "clang++")
+	common_env.Program ('bin/bufferUnitTest', ['../Main/BufferTest/source/BufferQUnit.cc', catalogSrc, recordSrc, bufferSrc])
+
+if ans=="4":
+	print("\nOK, building buffer unit tests using clang++.")
+	common_env.Replace(CXX = "clang++")
+	common_env.Program ('bin/recordUnitTest', ['../Main/RecordTest/source/RecordQUnit.cc', tableSrc, recordSrc, catalogSrc, bufferSrc])
+
+
