@@ -12,11 +12,13 @@
 #include "MyDB_TableReaderWriter.h"
 #include "MyDB_Schema.h"
 #include "QUnit.h"
-#include <cstring>
 #include <iostream>
+#include <cstring>
 #include <time.h>
 #include <unistd.h>
 #include <vector>
+#include <cstring>
+
 
 #define FALLTHROUGH_INTENDED do {} while (0)
 
