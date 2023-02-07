@@ -117,7 +117,8 @@ public:
 
 private:
 
-	// for fast reading from a page; the contents of the record are simply copied into this buffer
+	// for fast reading from a page;
+	// the contents of the record are simply copied into this buffer
 	char *buffer;
 
 	// the amount of space allocated for the buffer

@@ -92,7 +92,7 @@ public:
 private:
 
 	// the distinct value counts
-	vector <size_t> allCounts;
+	vector <size_t> allCounts; // nyytodo to figure it out
 
 	// the number of tuples
 	int count;

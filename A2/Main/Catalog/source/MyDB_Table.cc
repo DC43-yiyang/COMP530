@@ -151,24 +151,26 @@ bool MyDB_Table :: fromCatalog (string tableNameIn, MyDB_CatalogPtr catalog) {
 
 void MyDB_Table :: putInCatalog (MyDB_CatalogPtr catalog) {
 
-        // get the list of tables
-        vector <string> myTables;
-        catalog->getStringList ("tables", myTables);
+    // get the list of tables
+    vector <string> myTables;
+    catalog->getStringList ("tables", myTables);
 
-        // add the new table in, if not there
+    // add the new table in, if not there
 	bool inthere = false;	
 	for (string s : myTables) {
-		if (s == tableName)
+		if (s == tableName) {
 			inthere = true;
+		}
 	}
 
 	if (!inthere) {
-        	myTables.push_back (tableName);
-        	catalog->putStringList ("tables", myTables);
+    	myTables.push_back (tableName);		
+		// add the new element at the end of vector "myTables"
+    	catalog->putStringList ("tables", myTables);
 	}
 
 	// remember the storage location
-        catalog->putString (tableName + ".fileName", storageLoc);
+	catalog->putString (tableName + ".fileName", storageLoc);
 
 	// and the type
 	catalog->putString (tableName + ".fileType", fileType);
@@ -178,8 +180,9 @@ void MyDB_Table :: putInCatalog (MyDB_CatalogPtr catalog) {
 
 	// remember the number of distinct attribute vals
 	vector <string> temp;
-	for (auto a : allCounts)
+	for (auto a : allCounts) {
 		temp.push_back (to_string(a));
+	}
 	catalog->putStringList (tableName + ".valCounts", temp);
 
 	// remember the number of tuples
@@ -189,7 +192,7 @@ void MyDB_Table :: putInCatalog (MyDB_CatalogPtr catalog) {
 	catalog->putString (tableName + ".sortAtt", sortAtt);
 
 	// remember the last page in the file
-        catalog->putInt (tableName + ".lastPage", last);
+	catalog->putInt (tableName + ".lastPage", last);
 
 	// and add the schema in 
 	mySchema->putInCatalog (tableName, catalog);	

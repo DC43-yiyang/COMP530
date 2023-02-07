@@ -44,8 +44,8 @@ public:
 	// access the i^th page in this file
 	MyDB_PageReaderWriter operator [] (size_t i);
 
-        // access the last page in the file
-        MyDB_PageReaderWriter last ();
+    // access the last page in the file
+    MyDB_PageReaderWriter last ();
 
 private:
 

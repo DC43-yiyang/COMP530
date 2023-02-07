@@ -22,7 +22,7 @@ public:
 	// this should be called BEFORE the iterator record is first examined
 	virtual void getNext () = 0;
 
-	// return true iff there is another record in the file/page
+	// return true if there is another record in the file/page
 	virtual bool hasNext () = 0;
 
 	// destructor and contructor

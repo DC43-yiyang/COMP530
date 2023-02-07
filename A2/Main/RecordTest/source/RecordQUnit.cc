@@ -40,8 +40,12 @@ void initialize() {
 
 	// use the schema to create a table
 	MyDB_TablePtr myTable = make_shared <MyDB_Table>("supplier", "supplier.bin", mySchema);
+	// creates a table with the given name, at the given storage location, and the given schema
 	MyDB_BufferManagerPtr myMgr = make_shared <MyDB_BufferManager>(1024, 16, "tempFile");
+	// create the LRU buffer
+
 	MyDB_TableReaderWriter supplierTable(myTable, myMgr);
+	// create a table reader/writer for the specified table, using the specified
 
 	// load it from a text file
 	supplierTable.loadFromTextFile("supplier.tbl");
@@ -68,12 +72,15 @@ int main(int argc, char *argv[]) {
 	case 1:
 	{
 		// table hasNext
-		cout << "TEST 1..." << flush;
+		cout << "TEST 1..." << flush;// same to the endl just without "\"
 		initialize();
 		bool result = false;
 		{
 			cout << "create manager..." << flush;
 			MyDB_CatalogPtr myCatalog = make_shared <MyDB_Catalog>("catFile");
+			// creates an instance of the catalog.  If the specified file does
+			// not exist, it is created.  Otherwise, the existing file is 
+			// opened.
 			map <string, MyDB_TablePtr> allTables = MyDB_Table::getAllTables(myCatalog);
 			MyDB_BufferManagerPtr myMgr = make_shared <MyDB_BufferManager>(1024, 16, "tempFile");
 

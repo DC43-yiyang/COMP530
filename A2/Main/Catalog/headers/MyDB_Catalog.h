@@ -60,6 +60,7 @@ private:
 	string fName;
 
 	// the map that stores the catalog's contents
+	// table name string ------ storage location
 	map <string, string> myData;
 };
 
