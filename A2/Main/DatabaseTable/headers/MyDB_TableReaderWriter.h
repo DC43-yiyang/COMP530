@@ -48,8 +48,9 @@ public:
     MyDB_PageReaderWriter last ();
 
 private:
-
+	MyDB_TablePtr table;
 	// ANYTHING YOU NEED HERE
+	MyDB_BufferManagerPtr buffer;
 };
 
 #endif

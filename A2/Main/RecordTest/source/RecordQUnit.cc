@@ -41,11 +41,13 @@ void initialize() {
 	// use the schema to create a table
 	MyDB_TablePtr myTable = make_shared <MyDB_Table>("supplier", "supplier.bin", mySchema);
 	// creates a table with the given name, at the given storage location, and the given schema
+	
 	MyDB_BufferManagerPtr myMgr = make_shared <MyDB_BufferManager>(1024, 16, "tempFile");
 	// create the LRU buffer
 
 	MyDB_TableReaderWriter supplierTable(myTable, myMgr);
 	// create a table reader/writer for the specified table, using the specified
+	// you can think that using the myMgr buffermanager to manage the myTable
 
 	// load it from a text file
 	supplierTable.loadFromTextFile("supplier.tbl");

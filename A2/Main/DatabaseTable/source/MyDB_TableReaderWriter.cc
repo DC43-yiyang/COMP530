@@ -29,7 +29,19 @@ MyDB_PageReaderWriter MyDB_TableReaderWriter :: last () {
 void MyDB_TableReaderWriter :: append (MyDB_RecordPtr) {
 }
 
-void MyDB_TableReaderWriter :: loadFromTextFile (string) {
+void MyDB_TableReaderWriter :: loadFromTextFile (string fileName) {
+	this->table->setLastPage(0);
+
+	MyDB_RecordPtr tmpRecord = getEmptyRecord();
+	ifstream fileStream;
+	fileStream.open(fileName);
+	string line;
+	while (getline(fileStream, line)) {
+		tmpRecord -> fromString(line);
+		// cout << "empty record is: " << emptyRecord << endl;
+		append(tmpRecord);
+	}
+	fileStream.close();
 }
 
 MyDB_RecordIteratorPtr MyDB_TableReaderWriter :: getIterator (MyDB_RecordPtr) {
