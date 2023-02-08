@@ -1,0 +1,16 @@
+|supplier.acctbal.type|double|
+|supplier.address.type|string|
+|supplier.attList|suppkey#name#address#nationkey#phone#acctbal#comment#|
+|supplier.comment.type|string|
+|supplier.fileName|supplier.bin|
+|supplier.fileType|heap|
+|supplier.lastPage|1676|
+|supplier.name.type|string|
+|supplier.nationkey.type|int|
+|supplier.numTuples|0|
+|supplier.phone.type|string|
+|supplier.rootLocation|-1|
+|supplier.sortAtt|none|
+|supplier.suppkey.type|int|
+|supplier.valCounts||
+|tables|supplier#|

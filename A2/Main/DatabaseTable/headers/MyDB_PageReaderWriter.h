@@ -4,12 +4,17 @@
 
 #include "MyDB_PageType.h"
 #include "MyDB_TableReaderWriter.h"
+#include "MyDB_RecordIterator.h"
+
 
 class MyDB_PageReaderWriter {
-
 public:
 
 	// ANY OTHER METHODS YOU WANT HERE
+	// constructor
+
+	MyDB_PageReaderWriter(MyDB_BufferManagerPtr myBufferIn, MyDB_PageHandle pageIn);
+	~MyDB_PageReaderWriter ();
 
 	// empties out the contents of this page, so that it has no records in it
 	// the type of the page is set to MyDB_PageType :: RegularPage
@@ -31,13 +36,25 @@ public:
 	// sets the type of the page
 	void setType (MyDB_PageType toMe);
 
-	// nyytodo needs a constructor
-
+	
 	// nyytodo needs a deconstructor
 	
 private:
-
 	// ANYTHING ELSE YOU WANT HERE
+	MyDB_TablePtr tablePtr;
+	MyDB_BufferManagerPtr bufferManagerPtr;
+	MyDB_PageHandle pageHandle;
+	
+	// size_t index;
+	// the page's index, and we can also combine the index and tablePtr to get the handle
+	// the reanson why I do not treat the handle as the input parament is in funciton "append"
+	// at first I do not know the specific location that recordPtr to insert
+	// if each time I call the getPage funcition it's a big waste
+	
+	// It is a little bit awkward. two ways are same... above all, I am just talking...
+	
+	size_t pageSize;
+	// we can get the size by call bufferManager
 };
 
 #endif
