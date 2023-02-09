@@ -62,10 +62,9 @@ void MyDB_TableReaderWriter :: append (MyDB_RecordPtr appendMe) {
 	// you can just use the [] to replace the pageRWtemp
 	// but i like this method 
 
-	#if 0
+	#if 1
 	while (!((*this)[this->table->lastPage()]).append(appendMe))
 	{
-		// I know it is hard to understand, just read it.
 		// when add the "appendMe" to the index "lastPage()" failed
 		int last = this->table->lastPage() + 1;
 		this->table->setLastPage(last);
@@ -75,11 +74,6 @@ void MyDB_TableReaderWriter :: append (MyDB_RecordPtr appendMe) {
 		
 	}
 	#endif
-	while (!this->last().append(appendMe)) {
-        int last = this->table->lastPage() + 1;
-        this->table->setLastPage(last);
-        (*this)[last].clear();
-    }
 	
 }
 
