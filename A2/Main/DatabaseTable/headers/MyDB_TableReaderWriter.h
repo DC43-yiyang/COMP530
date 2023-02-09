@@ -58,6 +58,7 @@ private:
 	map <int, MyDB_PageReaderWriterPtr> pageMap;
 	MyDB_RecordPtr emptyRecord;
 
+	size_t pageSize;
 };
 
 #endif

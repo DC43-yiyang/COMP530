@@ -13,6 +13,8 @@ using namespace std;
 MyDB_TableReaderWriter :: MyDB_TableReaderWriter (MyDB_TablePtr table, MyDB_BufferManagerPtr buffer) {
 	this->table = table;
 	this->buffer = buffer;
+	this->pageSize = buffer->getPageSize();
+	
 	if(table->lastPage() == -1){
 		// there is nothing written to table
 		table->setLastPage(0);
