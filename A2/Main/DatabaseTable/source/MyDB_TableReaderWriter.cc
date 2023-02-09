@@ -30,11 +30,11 @@ MyDB_PageReaderWriter MyDB_TableReaderWriter :: operator [] (size_t i) {
 		//reference:https://piazza.com/class/lcp293khb9x406/post/102
 		this->table->setLastPage(this->table->lastPage() + 1);
 		//after loop you need to clear and return the last one
-		shared_ptr<MyDB_PageReaderWriter> temp = make_shared<MyDB_PageReaderWriter> (this->buffer, myPageH);  
+		shared_ptr<MyDB_PageReaderWriter> temp = make_shared<MyDB_PageReaderWriter> (this->pageSize, myPageH);  
 		temp->clear();
 	}
 	
-	this->pageMap[i] = make_shared<MyDB_PageReaderWriter> (this->buffer, myPageH);
+	this->pageMap[i] = make_shared<MyDB_PageReaderWriter> (this->pageSize, myPageH);
 	return *this->pageMap[i];	
 }
 

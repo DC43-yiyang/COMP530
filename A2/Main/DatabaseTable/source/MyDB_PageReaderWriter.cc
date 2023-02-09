@@ -57,11 +57,9 @@ bool MyDB_PageReaderWriter :: append (MyDB_RecordPtr record) {
 	return true;
 }
 
-MyDB_PageReaderWriter :: MyDB_PageReaderWriter(MyDB_BufferManagerPtr myBufferIn,  MyDB_PageHandle pageIn) {
-	this->bufferManagerPtr = myBufferIn;
+MyDB_PageReaderWriter :: MyDB_PageReaderWriter(size_t pageSizeIn,  MyDB_PageHandle pageIn) {
 	this->pageHandle = pageIn; 
-	pageSize = this->bufferManagerPtr->getPageSize();
-
+	this->pageSize = pageSizeIn;
 }
 
 MyDB_PageReaderWriter :: ~MyDB_PageReaderWriter () { }

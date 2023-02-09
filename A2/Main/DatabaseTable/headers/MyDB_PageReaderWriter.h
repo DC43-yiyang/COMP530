@@ -13,7 +13,9 @@ public:
 	// ANY OTHER METHODS YOU WANT HERE
 	// constructor
 
-	MyDB_PageReaderWriter(MyDB_BufferManagerPtr myBufferIn, MyDB_PageHandle pageIn);
+	// MyDB_PageReaderWriter(MyDB_BufferManagerPtr myBufferIn, MyDB_PageHandle pageIn);
+	MyDB_PageReaderWriter(size_t pageSize, MyDB_PageHandle pageIn);
+
 	~MyDB_PageReaderWriter ();
 
 	// empties out the contents of this page, so that it has no records in it
@@ -41,8 +43,6 @@ public:
 	
 private:
 	// ANYTHING ELSE YOU WANT HERE
-	MyDB_TablePtr tablePtr;
-	MyDB_BufferManagerPtr bufferManagerPtr;
 	MyDB_PageHandle pageHandle;
 	
 	// size_t index;
