@@ -49,22 +49,6 @@ MyDB_PageReaderWriter MyDB_TableReaderWriter :: last () {
 
 
 void MyDB_TableReaderWriter :: append (MyDB_RecordPtr appendMe) {
-	/* Although this way is more standard, but it cost too much waste. because we do not know the specific index which I should */
-	/* add the record to. So use the operator is a better way */	
-	// MyDB_PageReaderWriterPtr pageRWtemp = make_shared<MyDB_PageReaderWriter>(this->buffer, this->table, this->table->lastPage());
-	// while(!pageRWtemp->append(appendMe)){
-	// 	// there is no space in page to add new record
-	// 	// so you should move the last page plus 1 and clear, then add record to new index(last)
-	// 	int lastIndex = this->table->lastPage() + 1;
-	// 	this->table->setLastPage(lastIndex);
-	// 	pageRWtemp = make_shared<MyDB_PageReaderWriter>(this->buffer, this->table, this->table->lastPage());
-	// 	// here to update the pagePtr
-	// 	pageRWtemp->clear();
-	// }
-	// you can just use the [] to replace the pageRWtemp
-	// but i like this method 
-
-	#if 1
 	while (!((*this)[this->table->lastPage()]).append(appendMe))
 	{
 		// when add the "appendMe" to the index "lastPage()" failed
@@ -75,8 +59,6 @@ void MyDB_TableReaderWriter :: append (MyDB_RecordPtr appendMe) {
 		// clear it and try add again
 		
 	}
-	#endif
-	
 }
 
 MyDB_RecordIteratorPtr MyDB_TableReaderWriter :: getIterator (MyDB_RecordPtr recordPtr) {
