@@ -23,6 +23,7 @@
 #include <ctime>
 
 void print_houston_timestamp(string s) {
+	return;
     auto now = std::chrono::system_clock::now();
     auto now_c = std::chrono::system_clock::to_time_t(now);
     std::tm houston_tm = *std::localtime(&now_c);
@@ -40,6 +41,7 @@ void print_houston_timestamp(string s) {
 
     // Print the timestamp to the console
     std::cout<< "\n" << timestamp_str << '.' << milliseconds.count() << "\t" << s << std::endl;
+
 }
 
 
@@ -92,7 +94,6 @@ int main(int argc, char *argv[]) {
 
 	// dependency: the provided supplier.tbl
 	// dependency: matching precision for streaming out double numbers
-	start = 3;
 	switch (start) {
 	case 1:
 	{
@@ -186,7 +187,7 @@ int main(int argc, char *argv[]) {
 		else cout << "***FAIL***" << endl << flush;
 		QUNIT_IS_EQUAL(counter, 10000);
 	}
-	#if 0
+	#if 1
 	FALLTHROUGH_INTENDED;
 	case 4:
 	{

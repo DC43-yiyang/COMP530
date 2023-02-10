@@ -70,29 +70,25 @@ void MyDB_TableReaderWriter :: loadFromTextFile (string fileName) {
         (*this)[i].clear();
     }
 	this->table->setLastPage(0);
-	cout << "\n";
-	print_houston_timestamp("start loadFromTextFile...");
+	// print_houston_timestamp("start loadFromTextFile...");
 	MyDB_RecordPtr tmpRecord = getEmptyRecord();
 	ifstream fileStream;
 	fileStream.open(fileName);
 	string line;
-	int count = 0;
 	if (fileStream.is_open()) {
-		// Get an empty record created from schema for the table
-		// Read from the text file
+
 		while (getline(fileStream, line)) {
 			tmpRecord -> fromString(line);
-			// cout << "empty record is: " << emptyRecord << endl;
-			cout << "\n" << "----------------------------------------" << endl;
+			
+			// cout << "\n" << "----------------------------------------" << endl;
 
-			print_houston_timestamp("before append...");
+			// print_houston_timestamp("before append...");
 			append(tmpRecord);
-			print_houston_timestamp("after append...");
-			count++;
+			// print_houston_timestamp("after append...");
+			// count++;
 		}
-
-		print_houston_timestamp("Read from the text file...");
-		cout <<"####################"<< count << endl;
+		// print_houston_timestamp("Read from the text file...");
+		// cout <<"####################"<< count << endl;
 		fileStream.close();
 	}	
 }
