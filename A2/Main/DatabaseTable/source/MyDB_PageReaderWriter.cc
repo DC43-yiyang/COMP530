@@ -6,8 +6,6 @@
 #include "MyDB_PageRecIterator.h"
 
 void MyDB_PageReaderWriter :: clear () {
-	// empties out the contents of this page, so that it has no records in it
-	// the type of the page is set to MyDB_PageType :: RegularPage
 	size_t offset = sizeof(size_t) + sizeof(MyDB_PageType);
 	(* ((size_t *)(((char *)(this->pageHandle->getBytes())) + sizeof(MyDB_PageType)))) = offset;
 	this->pageHandle->wroteBytes();
@@ -29,24 +27,18 @@ void MyDB_PageReaderWriter :: setType (MyDB_PageType pageType) {
 }
 
 bool MyDB_PageReaderWriter :: append (MyDB_RecordPtr record) {
-	// First get the size of the record
 	size_t recordSize = record -> getBinarySize();
 	size_t usedSize = (*((size_t *)( ((char *)(this -> pageHandle -> getBytes())) + sizeof(MyDB_PageType))));
-	// Calculate remainning page size
 	size_t remainSize = this -> pageSize - usedSize;
 
 	char *myBytes = ((char *) this -> pageHandle -> getBytes());
 
-	// If there is not enough space on the page, return false
 	if (remainSize < recordSize) {
-		// cout << "apend  fail\n";
 		return false;
 	}
 	else {
-		// Append the record at the end of the page space
 		record -> toBinary (usedSize + myBytes);
 		(*((size_t *)( ((char *)(this -> pageHandle -> getBytes())) + sizeof(MyDB_PageType)))) += recordSize;
-		// cout << "apend  succ" <<endl;
 		this -> pageHandle -> wroteBytes();
 	}
 	
