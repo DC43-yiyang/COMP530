@@ -29,20 +29,21 @@ void MyDB_PageReaderWriter :: setType (MyDB_PageType pageType) {
 }
 
 bool MyDB_PageReaderWriter :: append (MyDB_RecordPtr record) {
-	// cout << "here is page append" << endl;
+	cout << "here is page append" << endl;
 	// First get the size of the record
 	size_t recordSize = record -> getBinarySize();
 	size_t usedSize = (*((size_t *)( ((char *)(this -> pageHandle -> getBytes())) + sizeof(MyDB_PageType))));
 	// Calculate remainning page size
 	size_t remainSize = this -> pageSize - usedSize;
 
-	// cout << "record size is: " << recordSize << endl;
-	// cout << "remainSize is: " << remainSize << endl;
+	cout << "record size is: " << recordSize << endl;
+	cout << "remainSize is: " << remainSize << endl;
 
 	char *myBytes = ((char *) this -> pageHandle -> getBytes());
 
 	// If there is not enough space on the page, return false
 	if (remainSize < recordSize) {
+		cout << "apend  fail\n";
 		return false;
 	}
 	else {
@@ -50,7 +51,7 @@ bool MyDB_PageReaderWriter :: append (MyDB_RecordPtr record) {
 		record -> toBinary (usedSize + myBytes);
 		// Augment the usedSize
 		(*((size_t *)( ((char *)(this -> pageHandle -> getBytes())) + sizeof(MyDB_PageType)))) += recordSize;
-		// cout << "after + record size, the used size is: " << usedSize << endl;
+		cout << "apend  succ" <<endl;
 		this -> pageHandle -> wroteBytes();
 	}
 	

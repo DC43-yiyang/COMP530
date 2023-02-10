@@ -13,8 +13,9 @@ class MyDB_TableRecIterator: public MyDB_RecordIterator {
 
 public:
     MyDB_TableRecIterator(MyDB_TableReaderWriter &parent, MyDB_TablePtr myTable, MyDB_RecordPtr myRecord);
-
-    bool hasNext(); // whether there is a next page in table 
+    ~MyDB_TableRecIterator () {};
+    
+    bool hasNext(); 
 
     void getNext();
 
@@ -23,7 +24,7 @@ private:
     MyDB_TablePtr table;
     MyDB_RecordPtr record;
     MyDB_RecordIteratorPtr pageRecIterator;
-    long pageIndex;
+    int pageIndex;
 };
 
 

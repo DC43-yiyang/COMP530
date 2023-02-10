@@ -4,19 +4,20 @@
 #include "MyDB_PageReaderWriter.h"
 
 bool MyDB_TableRecIterator :: hasNext(){
-    //need to loop through 
-    while (!this->pageRecIterator->hasNext())
-    {
-        this->pageIndex++;
-        if(this->pageIndex > this->table->lastPage())
-        {
-            // there is really no more iter
-            pageIndex --;
-            return false;
-        }    
+    if (this->pageRecIterator->hasNext()) {
+        return true;
     }
-    // if there is an adjacent page iterator for the tableIter return true 
-    return true;
+
+    while (this->pageIndex < this->table->lastPage()) {
+        this->pageIndex += 1;
+        this->pageRecIterator = this->myParent[this->pageIndex].getIterator(record);
+        // if there exists one page that has next record, return true 
+        if (this->pageRecIterator->hasNext()) {
+            return true;
+        }
+    }
+
+    return false;
     
 }
 

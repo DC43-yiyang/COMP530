@@ -7,7 +7,8 @@
 #include "MyDB_PageReaderWriter.h"
 #include "MyDB_TableReaderWriter.h"
 #include "MyDB_TableRecIterator.h"
-
+#include "../../Qunit/headers/QUnit.h"
+extern void print_houston_timestamp(string s);
 using namespace std;
 
 MyDB_TableReaderWriter :: MyDB_TableReaderWriter (MyDB_TablePtr table, MyDB_BufferManagerPtr buffer) {
@@ -57,28 +58,43 @@ void MyDB_TableReaderWriter :: append (MyDB_RecordPtr appendMe) {
 		// update the index
 		(*this)[last].clear();
 		// clear it and try add again
-		
 	}
 }
 
 MyDB_RecordIteratorPtr MyDB_TableReaderWriter :: getIterator (MyDB_RecordPtr recordPtr) {
-	MyDB_RecordIteratorPtr temp;
-	temp = make_shared<MyDB_TableRecIterator>(*this, this->table, recordPtr);
-	return temp;
+	return make_shared<MyDB_TableRecIterator>(*this, this->table, recordPtr);
 }
 
 void MyDB_TableReaderWriter :: loadFromTextFile (string fileName) {
+    for (int i = 0; i <= this->table->lastPage(); i++) {
+        (*this)[i].clear();
+    }
 	this->table->setLastPage(0);
-
+	cout << "\n";
+	print_houston_timestamp("start loadFromTextFile...");
 	MyDB_RecordPtr tmpRecord = getEmptyRecord();
 	ifstream fileStream;
 	fileStream.open(fileName);
 	string line;
-	while (getline(fileStream, line)) {
-		tmpRecord -> fromString(line);
-		append(tmpRecord);
-	}
-	fileStream.close();
+	int count = 0;
+	if (fileStream.is_open()) {
+		// Get an empty record created from schema for the table
+		// Read from the text file
+		while (getline(fileStream, line)) {
+			tmpRecord -> fromString(line);
+			// cout << "empty record is: " << emptyRecord << endl;
+			cout << "\n" << "----------------------------------------" << endl;
+
+			print_houston_timestamp("before append...");
+			append(tmpRecord);
+			print_houston_timestamp("after append...");
+			count++;
+		}
+
+		print_houston_timestamp("Read from the text file...");
+		cout <<"####################"<< count << endl;
+		fileStream.close();
+	}	
 }
 
 void MyDB_TableReaderWriter :: writeIntoTextFile (string fileName) {
