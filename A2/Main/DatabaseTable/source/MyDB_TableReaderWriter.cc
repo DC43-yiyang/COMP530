@@ -53,10 +53,10 @@ void MyDB_TableReaderWriter :: append (MyDB_RecordPtr appendMe) {
 	while (!((*this)[this->table->lastPage()]).append(appendMe))
 	{
 		// when add the "appendMe" to the index "lastPage()" failed
-		int last = this->table->lastPage() + 1;
-		this->table->setLastPage(last);
+		int index = this->table->lastPage() + 1;
+		this->table->setLastPage(index);
 		// update the index
-		(*this)[last].clear();
+		(*this)[index].clear();
 		// clear it and try add again
 	}
 }

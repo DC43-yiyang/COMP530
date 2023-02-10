@@ -7,7 +7,8 @@ bool MyDB_TableRecIterator :: hasNext(){
     if (this->pageRecIterator->hasNext()) {
         return true;
     }
-
+    // if there is not. we need to update the index to check whether it exists in next
+    
     while (this->pageIndex < this->table->lastPage()) {
         this->pageIndex += 1;
         this->pageRecIterator = this->myParent[this->pageIndex].getIterator(record);

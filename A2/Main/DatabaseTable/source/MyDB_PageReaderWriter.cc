@@ -29,7 +29,6 @@ void MyDB_PageReaderWriter :: setType (MyDB_PageType pageType) {
 }
 
 bool MyDB_PageReaderWriter :: append (MyDB_RecordPtr record) {
-	// cout << "here is page append" << endl;
 	// First get the size of the record
 	size_t recordSize = record -> getBinarySize();
 	size_t usedSize = (*((size_t *)( ((char *)(this -> pageHandle -> getBytes())) + sizeof(MyDB_PageType))));
