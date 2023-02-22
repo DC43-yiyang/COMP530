@@ -27,17 +27,23 @@ public:
 	/* NOTE THAT EACH OF THESE METHODS ARE REQUIRED */
 
 	// create a BTree TableReaderWriter
+	/*accept the name of the attribute to use as the sorting attribute for the B+ Tree */
+	/* the table corresponding to the B+ Tree */
+	/* the buffer manager used to serve up pages for the tree */
 	MyDB_BPlusTreeReaderWriter (string nameOfAttToOrderOn, MyDB_TablePtr forMe, MyDB_BufferManagerPtr myBuffer);
+	// nyytodo: here I can use the MyDB_Table.setRootLocation() to save it and call getRootLocation() to retrieve it. 
 
-        // gets an instance of an alternate iterator over the table... this is an
-        // iterator that has the alternate getCurrent ()/advance () interface
+    // gets an instance of an alternate iterator over the table... this is an
+    // iterator that has the alternate getCurrent ()/advance () interface
 	// return all records with a key value in the range [low, high], inclusive
-        MyDB_RecordIteratorAltPtr getRangeIteratorAlt (MyDB_AttValPtr low, MyDB_AttValPtr high);
+    MyDB_RecordIteratorAltPtr getRangeIteratorAlt (MyDB_AttValPtr low, MyDB_AttValPtr high);
+	/* rely on discoverPages() */
 	
-        // gets an instance of an alternate iterator over the table... this is an
-        // iterator that has the alternate getCurrent ()/advance () interface... returned records must be sorted
+    // gets an instance of an alternate iterator over the table... this is an
+    // iterator that has the alternate getCurrent ()/advance () interface... returned records must be sorted
 	// return all records with a key value in the range [low, high], inclusive
-        MyDB_RecordIteratorAltPtr getSortedRangeIteratorAlt (MyDB_AttValPtr low, MyDB_AttValPtr high);
+    MyDB_RecordIteratorAltPtr getSortedRangeIteratorAlt (MyDB_AttValPtr low, MyDB_AttValPtr high);
+	/* note: call the discoverPages(), use the provided class MyDB_PageListIteratorSelfSortingAlt to perform the iteration*/
 	
 	// append a record to the B+-Tree
 	void append (MyDB_RecordPtr appendMe);
@@ -54,6 +60,7 @@ private:
 	// have a value in the range [low, high], inclusive should be returned from this call
 	bool discoverPages (int whichPage, vector <MyDB_PageReaderWriter> &list,
         	MyDB_AttValPtr low, MyDB_AttValPtr high);
+	/* return a bool to indicate whether this page pointed to by whichPage at the leaf level */
 
 	// appends a record to the named page; if there is a split, then an MyDB_INRecordPtr is returned that
 	// points to the record holding the (key, ptr) pair pointing to the new page.  Note that the new page

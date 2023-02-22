@@ -70,6 +70,7 @@ public:
 
 	// sets the type of the page
 	void setType (MyDB_PageType toMe);
+	// use this to set the type of page.
 	
 	// sorts the contents of the page... the boolean lambda that is sent into
 	// this function must check to see if the contents of the record pointed to
