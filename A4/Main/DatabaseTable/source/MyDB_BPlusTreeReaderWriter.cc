@@ -65,7 +65,7 @@ bool MyDB_BPlusTreeReaderWriter :: discoverPages (int whichPage, vector <MyDB_Pa
 		{
 			tempIter->getCurrent(tempPtr);
 			if(buildComparator(tempPtr,lowPtr)){
-				// tempPtr.value < lowPtr.value
+				// tempPtr.value < lowPtr.value, satisfy so add it to the queue
 				pageQueue.push(tempPtr->getPtr());
 			}
 
