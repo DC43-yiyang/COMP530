@@ -32,7 +32,53 @@ MyDB_RecordIteratorAltPtr MyDB_BPlusTreeReaderWriter :: getRangeIteratorAlt (MyD
 
 
 bool MyDB_BPlusTreeReaderWriter :: discoverPages (int whichPage, vector <MyDB_PageReaderWriter> &list, MyDB_AttValPtr low, MyDB_AttValPtr high) {
+	// Any pages found are then returned to the caller by putting them in the parameter list
+	// whichPage is the identity of a page in the file 
+	queue<int> pageQueue;
+	pageQueue.push(whichPage);
+	while (!pageQueue.empty())
+	{
+		// judge whether there is element in the queue
+		// the BPlusTreeReaderWriter is the subclass of the TableReaderWriter so I can directly use the [index] to get the index^th page(pageReadWriter)
+		MyDB_PageReaderWriter curPage = (*this)[pageQueue.front()];
+		if (curPage.getType() == MyDB_PageType::RegularPage)
+		{
+			// leaf nodes
+			// what we need to know is if the page is regular, just put it in the list and return true.
+			list.push_back(curPage);
+			return true;
+		}
+		pageQueue.pop();
+		// after judging the leaf node or not you need to pop it, when we need to add it see below
+		// there is about the internal nodes
+		MyDB_INRecordPtr lowPtr = getINRecord();
+		MyDB_INRecordPtr highPtr = getINRecord();
+		MyDB_INRecordPtr tempPtr = getINRecord();
+		// initialize the three ptr
+
+		MyDB_RecordIteratorAltPtr tempIter = curPage.getIteratorAlt();
+
+		lowPtr->setKey(low);
+		highPtr->setKey(high);
+
+		while (tempIter->advance())
+		{
+			tempIter->getCurrent(tempPtr);
+			if(buildComparator(tempPtr,lowPtr)){
+				// tempPtr.value < lowPtr.value
+				pageQueue.push(tempPtr->getPtr());
+			}
+
+			if (buildComparator(highPtr,tempPtr))
+			{
+				// over boundary
+				break;
+			}
+
+		}
+	}
 	return false;
+	// the return boolean value indicating whether the page pointed to by whichPage was at the leaf level
 }
 
 void MyDB_BPlusTreeReaderWriter :: append (MyDB_RecordPtr appendMe) {
