@@ -113,7 +113,7 @@ void MyDB_BPlusTreeReaderWriter :: append (MyDB_RecordPtr appendMe) {
 	if(getNumPages() <= 1)
 	{
 		MyDB_PageReaderWriter root = (*this)[0];
-		rootLocation = 0;
+		this->rootLocation = 0;
 		getTable()->setRootLocation(0);
 		// complete the root
 		root.setType(DirectoryPage);
@@ -134,25 +134,25 @@ void MyDB_BPlusTreeReaderWriter :: append (MyDB_RecordPtr appendMe) {
 	else
 	{
 		// valid B+ tree
-		MyDB_RecordPtr newRecInRoot = append(rootLocation, appendMe);
+		MyDB_RecordPtr newRecInRoot = append(this->rootLocation, appendMe);
 		if(nullptr != newRecInRoot){
-			int temp;
-			MyDB_PageReaderWriter newRoot = (*this)[getTable()->lastPage()+1];
-			temp = getTable()->lastPage()+1;
-			getTable()->setLastPage(temp);
-			newRoot.clear ();
-			newRoot.setType (DirectoryPage);
+			// add successfully
+			int newRootLoc = getTable()->lastPage()+1;
+			MyDB_PageReaderWriter newRoot = (*this)[newRootLoc];
+			getTable()->setLastPage(newRootLoc);
 
+			// insert the record points to the corresponding page
+			newRoot.clear();
+			newRoot.setType(DirectoryPage);
 			newRoot.append(newRecInRoot);
+
 			MyDB_INRecordPtr newRec = getINRecord();
-			newRec->setPtr(rootLocation);
+			newRec->setPtr(this->rootLocation);
 			newRoot.append(newRec);
 
             rootLocation = getTable()->lastPage();
             getTable()->setRootLocation(rootLocation);
 		}
-
-
 	}
 }
 
