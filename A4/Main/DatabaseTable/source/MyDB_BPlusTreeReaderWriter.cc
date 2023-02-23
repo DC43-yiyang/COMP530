@@ -93,7 +93,7 @@ bool MyDB_BPlusTreeReaderWriter :: discoverPages (int whichPage, vector <MyDB_Pa
 			if(buildComparator(tempPtr,lowPtr)){
 				continue;
 			}
-				pageQueue.push(tempPtr->getPtr());
+			pageQueue.push(tempPtr->getPtr());
 
 			if (buildComparator(highPtr,tempPtr))
 			{
