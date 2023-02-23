@@ -44,6 +44,7 @@ MyDB_RecordIteratorAltPtr MyDB_BPlusTreeReaderWriter :: getRangeIteratorAlt (MyD
 	MyDB_INRecordPtr lowPtr = getINRecord();
 	MyDB_INRecordPtr highPtr = getINRecord();
 	MyDB_RecordPtr tempPtr = getEmptyRecord();
+
 	lowPtr->setKey(low);
 	highPtr->setKey(high);
 	function<bool()> lowBound = buildComparator(tempPtr, lowPtr);
@@ -72,7 +73,6 @@ bool MyDB_BPlusTreeReaderWriter :: discoverPages (int whichPage, vector <MyDB_Pa
 			// leaf nodes
 			// what we need to know is if the page is regular, just put it in the list and return true.
 			list.push_back(curPage);
-			return true;
 		}
 		pageQueue.pop();
 		// after judging the leaf node or not you need to pop it, when we need to add it see below
@@ -91,9 +91,9 @@ bool MyDB_BPlusTreeReaderWriter :: discoverPages (int whichPage, vector <MyDB_Pa
 		{
 			tempIter->getCurrent(tempPtr);
 			if(buildComparator(tempPtr,lowPtr)){
-				// tempPtr.value < lowPtr.value, satisfy so add it to the queue
-				pageQueue.push(tempPtr->getPtr());
+				continue;
 			}
+				pageQueue.push(tempPtr->getPtr());
 
 			if (buildComparator(highPtr,tempPtr))
 			{
@@ -103,7 +103,7 @@ bool MyDB_BPlusTreeReaderWriter :: discoverPages (int whichPage, vector <MyDB_Pa
 
 		}
 	}
-	return false;
+	return !list.empty();
 	// the return boolean value indicating whether the page pointed to by whichPage was at the leaf level
 }
 
