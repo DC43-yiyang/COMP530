@@ -108,6 +108,52 @@ bool MyDB_BPlusTreeReaderWriter :: discoverPages (int whichPage, vector <MyDB_Pa
 }
 
 void MyDB_BPlusTreeReaderWriter :: append (MyDB_RecordPtr appendMe) {
+	// first we need to check if there is a valid B+ tree. Follow the A4 pdf says.
+	// the empty B+ tree is an empty tree with only one node, which is the root node. so we got
+	if(getNumPages() <= 1)
+	{
+		MyDB_PageReaderWriter root = (*this)[0];
+		rootLocation = 0;
+		getTable()->setRootLocation(0);
+		// complete the root
+		root.setType(DirectoryPage);
+		root.clear();
+
+		// initial the internal node first, and add it to the root
+		MyDB_INRecordPtr newInNode = getINRecord();
+		newInNode->setPtr(1);
+		getTable()->setLastPage(1);
+		root.append(newInNode);
+
+		// leaf node
+		MyDB_PageReaderWriter newLeaf = (*this)[1];
+		newLeaf.setType(RegularPage);
+		newLeaf.clear();
+		newLeaf.append(appendMe);
+	}
+	else
+	{
+		// valid B+ tree
+		MyDB_RecordPtr newRecInRoot = append(rootLocation, appendMe);
+		if(nullptr != newRecInRoot){
+			int temp;
+			MyDB_PageReaderWriter newRoot = (*this)[getTable()->lastPage()+1];
+			temp = getTable()->lastPage()+1;
+			getTable()->setLastPage(temp);
+			newRoot.clear ();
+			newRoot.setType (DirectoryPage);
+
+			newRoot.append(newRecInRoot);
+			MyDB_INRecordPtr newRec = getINRecord();
+			newRec->setPtr(rootLocation);
+			newRoot.append(newRec);
+
+            rootLocation = getTable()->lastPage();
+            getTable()->setRootLocation(rootLocation);
+		}
+
+
+	}
 }
 
 MyDB_RecordPtr MyDB_BPlusTreeReaderWriter :: split (MyDB_PageReaderWriter splitRW, MyDB_RecordPtr splitRPtr) {
