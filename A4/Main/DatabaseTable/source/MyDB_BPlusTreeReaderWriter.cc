@@ -23,11 +23,39 @@ MyDB_BPlusTreeReaderWriter :: MyDB_BPlusTreeReaderWriter (string orderOnAttName,
 }
 
 MyDB_RecordIteratorAltPtr MyDB_BPlusTreeReaderWriter :: getSortedRangeIteratorAlt (MyDB_AttValPtr low, MyDB_AttValPtr high) {
-	return nullptr;
+	vector<MyDB_PageReaderWriter> rangePages;
+	MyDB_INRecordPtr lowPtr = getINRecord();
+	MyDB_INRecordPtr highPtr = getINRecord();
+	MyDB_INRecordPtr tempPtr = getINRecord();
+
+	lowPtr->setKey(low);
+	highPtr->setKey(high);
+	function<bool()> lowBound = buildComparator(tempPtr, lowPtr);
+    function<bool()> highBound = buildComparator(highPtr, tempPtr);
+
+    MyDB_RecordPtr lhs = getEmptyRecord();
+    MyDB_RecordPtr rhs = getEmptyRecord();
+	function<bool()> comparator = buildComparator(lhs, rhs);
+	
+	return make_shared<MyDB_PageListIteratorSelfSortingAlt>(rangePages, lhs, rhs, comparator, tempPtr, lowBound, highBound, true);
 }
 
 MyDB_RecordIteratorAltPtr MyDB_BPlusTreeReaderWriter :: getRangeIteratorAlt (MyDB_AttValPtr low, MyDB_AttValPtr high) {
-	return nullptr;
+	vector<MyDB_PageReaderWriter> rangePages;
+	MyDB_INRecordPtr lowPtr = getINRecord();
+	MyDB_INRecordPtr highPtr = getINRecord();
+	MyDB_INRecordPtr tempPtr = getINRecord();
+
+	lowPtr->setKey(low);
+	highPtr->setKey(high);
+	function<bool()> lowBound = buildComparator(tempPtr, lowPtr);
+    function<bool()> highBound = buildComparator(highPtr, tempPtr);
+
+    MyDB_RecordPtr lhs = getEmptyRecord();
+    MyDB_RecordPtr rhs = getEmptyRecord();
+	function<bool()> comparator = buildComparator(lhs, rhs);
+	
+	return make_shared<MyDB_PageListIteratorSelfSortingAlt>(rangePages, lhs, rhs, comparator, tempPtr, lowBound, highBound, false);
 }
 
 
