@@ -91,6 +91,7 @@ private:
 
 	// the number of the attribute that we are ordering on, in the data records
 	int whichAttIsOrdering;
+	void printHelper (int whichPage, int depth);
 
 };
 
