@@ -26,8 +26,7 @@ MyDB_RecordIteratorAltPtr MyDB_BPlusTreeReaderWriter :: getSortedRangeIteratorAl
 	vector<MyDB_PageReaderWriter> rangePages;
 	MyDB_INRecordPtr lowPtr = getINRecord();
 	MyDB_INRecordPtr highPtr = getINRecord();
-	MyDB_INRecordPtr tempPtr = getINRecord();
-
+	MyDB_RecordPtr tempPtr = getEmptyRecord();
 	lowPtr->setKey(low);
 	highPtr->setKey(high);
 	function<bool()> lowBound = buildComparator(tempPtr, lowPtr);
@@ -44,8 +43,7 @@ MyDB_RecordIteratorAltPtr MyDB_BPlusTreeReaderWriter :: getRangeIteratorAlt (MyD
 	vector<MyDB_PageReaderWriter> rangePages;
 	MyDB_INRecordPtr lowPtr = getINRecord();
 	MyDB_INRecordPtr highPtr = getINRecord();
-	MyDB_INRecordPtr tempPtr = getINRecord();
-
+	MyDB_RecordPtr tempPtr = getEmptyRecord();
 	lowPtr->setKey(low);
 	highPtr->setKey(high);
 	function<bool()> lowBound = buildComparator(tempPtr, lowPtr);
