@@ -142,7 +142,7 @@ int main (int argc, char *argv[]) {
 			cout << "\tTEST FAILED\n";
                 QUNIT_IS_TRUE (result);
 	}
-	#if 0
+	#if 1
 	FALLTHROUGH_INTENDED;
 	case 5:
 	{
