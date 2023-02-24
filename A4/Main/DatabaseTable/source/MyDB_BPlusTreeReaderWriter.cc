@@ -161,6 +161,52 @@ MyDB_RecordPtr MyDB_BPlusTreeReaderWriter :: split (MyDB_PageReaderWriter splitR
 }
 
 MyDB_RecordPtr MyDB_BPlusTreeReaderWriter :: append (int whichPage, MyDB_RecordPtr appendMe) {
+	MyDB_PageReaderWriter pageAddMe = (*this)[whichPage];
+	// this pageReaderWriter need to add
+	if (pageAddMe.getType() == RegularPage)
+	{
+		// this page is a leaf page, directly add 
+		if(pageAddMe.append(appendMe)){
+			return nullptr;
+		}
+		else{
+			// if failed, we need to split the page
+			return split(pageAddMe, appendMe);
+		}
+		
+	}
+	else{
+		// it is an internal node, we need to find the subroot to add
+		MyDB_RecordIteratorAltPtr recIter = pageAddMe.getIteratorAlt();
+
+		MyDB_INRecordPtr tempInRec = getINRecord();
+		function <bool ()> comparator = buildComparator(appendMe, tempInRec);
+		while (recIter->advance())
+		{
+			recIter->getCurrent(tempInRec);
+			// if we find the record that is larger than appendMe record.
+			// what we do is to recursively find the final insertion position
+			if(comparator()){
+				MyDB_RecordPtr recPtr = append(tempInRec->getPtr(), appendMe);
+				// recursive
+				if (recPtr != nullptr)
+				{
+					// there is not nullptr, we need a split
+					if (pageAddMe.append(recPtr))
+					{
+						MyDB_INRecordPtr curRec = getINRecord();
+						function <bool ()> comparator = buildComparator(recPtr, curRec);
+						pageAddMe.sortInPlace(comparator, recPtr, curRec);
+						return nullptr;
+					}
+
+					 return this->split(pageAddMe, recPtr);
+				}
+				return nullptr;
+				
+			}
+		}
+	}
 	return nullptr;
 }
 
