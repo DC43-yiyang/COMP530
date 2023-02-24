@@ -166,9 +166,74 @@ void MyDB_BPlusTreeReaderWriter :: append (MyDB_RecordPtr appendMe) {
 	}
 }
 
+// splits the given page (plus the record andMe) around the median.  A MyDB_INRecordPtr is returned that
+// points to the record holding the (key, ptr) pair pointing to the new page.  Note that the new page
+// always holds the lower 1/2 of the records on the page; the upper 1/2 remains in the original page
+
 MyDB_RecordPtr MyDB_BPlusTreeReaderWriter :: split (MyDB_PageReaderWriter splitRW, MyDB_RecordPtr splitRPtr) {
-	return nullptr;
+	int newRootLoc = getTable()->lastPage() + 1;
+    MyDB_PageReaderWriter newPage = (*this)[newRootLoc];
+    MyDB_PageType currentType = splitRW.getType();
+    MyDB_RecordPtr lhs, rhs;
+    function<bool ()> comparator, insertionComp;
+	// using different record for different nodes
+    if (currentType == RegularPage) {
+        lhs = getEmptyRecord();
+        rhs = getEmptyRecord();
+    } else if (currentType == DirectoryPage) {
+        lhs = getINRecord();
+        rhs = getINRecord();
+    }
+
+    MyDB_INRecordPtr newInterRec = getINRecord();
+    newPage.setType(currentType);
+    comparator = buildComparator(lhs, rhs);
+
+    if (currentType == RegularPage) {
+        splitRW.sortInPlace(comparator, lhs, rhs);
+    }
+    bool flag = false;
+    vector<MyDB_RecordPtr> listToSplit;
+    MyDB_RecordIteratorAltPtr iter = splitRW.getIteratorAlt();
+	
+    while (iter->advance()) {
+        MyDB_RecordPtr temp;
+        if (currentType == RegularPage) {
+            temp = getEmptyRecord();
+        } else if (currentType == DirectoryPage) {
+            temp = getINRecord();
+        }
+        iter->getCurrent(temp);
+        if (!flag) {
+            insertionComp = buildComparator(splitRPtr, temp);
+            if (insertionComp()) {
+                flag = true;
+                listToSplit.push_back(splitRPtr);
+            }
+        }
+        listToSplit.push_back(temp);
+    }
+
+    if (!flag) {
+        listToSplit.push_back(splitRPtr);
+    }
+    splitRW.clear();
+    if (currentType == DirectoryPage) {
+        splitRW.setType(DirectoryPage);
+    }
+    int i;
+    for (i = 0; i < (listToSplit.size()+1)/2; i++) {
+        newPage.append(listToSplit[i]);
+    }
+    newInterRec->setPtr(getTable()->lastPage());
+    newInterRec->setKey(getKey(listToSplit[i - 1]));
+    for (; i < listToSplit.size(); i++) {
+        splitRW.append(listToSplit[i]);
+    }
+
+	return newInterRec;
 }
+
 
 MyDB_RecordPtr MyDB_BPlusTreeReaderWriter :: append (int whichPage, MyDB_RecordPtr appendMe) {
 	MyDB_PageReaderWriter pageAddMe = (*this)[whichPage];
