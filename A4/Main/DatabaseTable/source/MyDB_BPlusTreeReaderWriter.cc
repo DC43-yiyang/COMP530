@@ -24,6 +24,8 @@ MyDB_BPlusTreeReaderWriter :: MyDB_BPlusTreeReaderWriter (string orderOnAttName,
 
 MyDB_RecordIteratorAltPtr MyDB_BPlusTreeReaderWriter :: getSortedRangeIteratorAlt (MyDB_AttValPtr low, MyDB_AttValPtr high) {
 	vector<MyDB_PageReaderWriter> rangePages;
+	this->discoverPages(this->rootLocation, rangePages, low, high);
+
 	MyDB_INRecordPtr lowPtr = getINRecord();
 	MyDB_INRecordPtr highPtr = getINRecord();
 	MyDB_RecordPtr tempPtr = getEmptyRecord();
@@ -41,6 +43,7 @@ MyDB_RecordIteratorAltPtr MyDB_BPlusTreeReaderWriter :: getSortedRangeIteratorAl
 
 MyDB_RecordIteratorAltPtr MyDB_BPlusTreeReaderWriter :: getRangeIteratorAlt (MyDB_AttValPtr low, MyDB_AttValPtr high) {
 	vector<MyDB_PageReaderWriter> rangePages;
+	this->discoverPages(this->rootLocation, rangePages, low, high);
 	MyDB_INRecordPtr lowPtr = getINRecord();
 	MyDB_INRecordPtr highPtr = getINRecord();
 	MyDB_RecordPtr tempPtr = getEmptyRecord();
