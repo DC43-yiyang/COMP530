@@ -60,7 +60,7 @@ MyDB_RecordIteratorAltPtr MyDB_BPlusTreeReaderWriter :: getRangeIteratorAlt (MyD
 	return make_shared<MyDB_PageListIteratorSelfSortingAlt>(rangePages, lhs, rhs, comparator, tempPtr, lowBound, highBound, false);
 }
 
-
+// nyytodo
 bool MyDB_BPlusTreeReaderWriter :: discoverPages (int whichPage, vector <MyDB_PageReaderWriter> &list, MyDB_AttValPtr low, MyDB_AttValPtr high) {
 	// Any pages found are then returned to the caller by putting them in the parameter list
 	// whichPage is the identity of a page in the file 
@@ -119,8 +119,8 @@ void MyDB_BPlusTreeReaderWriter :: append (MyDB_RecordPtr appendMe) {
 		this->rootLocation = 0;
 		getTable()->setRootLocation(0);
 		// complete the root
-		root.setType(DirectoryPage);
 		root.clear();
+		root.setType(DirectoryPage);
 
 		// initial the internal node first, and add it to the root
 		MyDB_INRecordPtr newInNode = getINRecord();
@@ -153,8 +153,8 @@ void MyDB_BPlusTreeReaderWriter :: append (MyDB_RecordPtr appendMe) {
 			newRec->setPtr(this->rootLocation);
 			newRoot.append(newRec);
 
-            rootLocation = getTable()->lastPage();
-            getTable()->setRootLocation(rootLocation);
+            this->rootLocation = getTable()->lastPage();
+            getTable()->setRootLocation(this->rootLocation);
 		}
 	}
 }
