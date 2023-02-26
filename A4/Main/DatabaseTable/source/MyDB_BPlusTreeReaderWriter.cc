@@ -222,15 +222,16 @@ MyDB_RecordPtr MyDB_BPlusTreeReaderWriter :: split (MyDB_PageReaderWriter splitR
         splitRW.setType(DirectoryPage);
     }
     int i;
-    for (i = 0; i < (listToSplit.size()+1)/2; i++) {
+    int size = listToSplit.size();
+    int mid = size / 2;
+    for (i = 0; i < mid; i++) {
         newPage.append(listToSplit[i]);
     }
     newInterRec->setPtr(getTable()->lastPage());
     newInterRec->setKey(getKey(listToSplit[i - 1]));
-    for (; i < listToSplit.size(); i++) {
+    for (; i < size; i++) {
         splitRW.append(listToSplit[i]);
     }
-
 	return newInterRec;
 }
 
