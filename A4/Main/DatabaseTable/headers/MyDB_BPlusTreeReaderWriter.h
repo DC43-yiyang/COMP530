@@ -83,8 +83,6 @@ private:
 	// only if the first record has a key value less than the second record
 	function <bool ()> buildComparator (MyDB_RecordPtr lhs, MyDB_RecordPtr rhs);
 	
-	//build iterator helper
-	MyDB_RecordIteratorAltPtr iteratorHelper(MyDB_AttValPtr low, MyDB_AttValPtr high, bool ifNeedSorted); 
 	// the location (page number) of the root in the tree
 	int rootLocation;
 
