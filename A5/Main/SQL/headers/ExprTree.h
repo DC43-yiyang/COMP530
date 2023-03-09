@@ -3,6 +3,7 @@
 #define SQL_EXPRESSIONS
 
 #include "MyDB_AttType.h"
+#include "MyDB_Catalog.h"
 #include <string>
 #include <vector>
 
@@ -17,6 +18,7 @@ typedef shared_ptr <ExprTree> ExprTreePtr;
 class ExprTree {
 
 public:
+	static MyDB_CatalogPtr catalogPtr;
 	virtual string toString () = 0;
 	virtual ~ExprTree () {}
 };

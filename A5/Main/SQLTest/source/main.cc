@@ -12,6 +12,7 @@
 #include <iterator>
 
 using namespace std;
+MyDB_Catalog ExprTree::catalogPtr = nullptr;
 string toLower (string data) {
 	transform(data.begin(), data.end(), data.begin(), ::tolower);
 	return data;
@@ -163,6 +164,9 @@ int main (int numArgs, char **args) {
 
 						// print it out
 						final->printSFWQuery ();
+						cout << "\t ------------check semantics------------\n";
+						final->checkSFWQuery ();
+						cout << "\t ------------result above------------\n";
 					}
 
 					// get outta here

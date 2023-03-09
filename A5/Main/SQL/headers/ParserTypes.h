@@ -253,7 +253,9 @@ public:
 			cout << "\t" << a->toString () << "\n";
 		}
 	}
+	bool check(){
 
+	}
 	#include "FriendDecls.h"
 };
 
@@ -297,6 +299,12 @@ public:
 	
 	void printSFWQuery () {
 		myQuery.print ();
+	}
+
+	void checkSFWQuery(MyDB_CatalogPtr cPtr) {
+		ExprTree::CatalogPtr = cPtr;
+
+		myQuery.check();
 	}
 
 	#include "FriendDecls.h"
