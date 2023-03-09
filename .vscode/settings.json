@@ -3,6 +3,7 @@
         "functional": "cpp",
         "memory": "cpp",
         "sstream": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "iterator": "cpp"
     }
 }
