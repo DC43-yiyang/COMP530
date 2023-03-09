@@ -82,7 +82,7 @@ private:
 	// tree, or they must be LN records for this tree, or a combination.  The resulting comparator returns true if and
 	// only if the first record has a key value less than the second record
 	function <bool ()> buildComparator (MyDB_RecordPtr lhs, MyDB_RecordPtr rhs);
-
+	
 	// the location (page number) of the root in the tree
 	int rootLocation;
 

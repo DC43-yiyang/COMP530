@@ -59,6 +59,44 @@ MyDB_RecordIteratorAltPtr MyDB_BPlusTreeReaderWriter :: getRangeIteratorAlt (MyD
 	
 	return make_shared<MyDB_PageListIteratorSelfSortingAlt>(rangePages, lhs, rhs, comparator, tempPtr, lowBound, highBound, false);
 }
+// Another solution to discoverPage
+// bool MyDB_BPlusTreeReaderWriter :: discoverPages (int whichPage, vector <MyDB_PageReaderWriter> &list, MyDB_AttValPtr low, MyDB_AttValPtr high) {
+// 	MyDB_PageReaderWriter curPage = (*this)[whichPage];
+// 	// Return it if it is a leaf page
+// 	if (curPage.getType() == MyDB_PageType::RegularPage) {
+// 		list.push_back(curPage);
+// 		return true;
+// 	}
+// 	// iterate the rest to find the page
+// 	MyDB_RecordIteratorAltPtr iter = curPage.getIteratorAlt();
+
+// 	//build comparator
+// 	MyDB_INRecordPtr lhs = getINRecord();
+// 	MyDB_INRecordPtr rhs = getINRecord();
+// 	lhs -> setKey(low);
+// 	rhs -> setKey(high);
+
+// 	MyDB_INRecordPtr curRec = getINRecord();
+
+// 	bool isLeaf = false;
+// 	while(iter->advance()) {
+// 		iter->getCurrent(curRec);
+// 		// curRec should >= lhs
+// 		if (!buildComparator(curRec, lhs)()) {
+// 			int curId = curRec -> getPtr();
+// 			if (isLeaf) {
+// 				list.push_back((*this)[curId]);
+// 			}
+// 			else {
+// 				isLeaf = discoverPages(curId, list, low, high);
+// 			}
+// 		}
+// 		if (buildComparator(rhs, curRec)()) {
+// 			return false;
+// 		} 
+// 	}
+// 	return false;	
+// }
 
 // nyytodo
 bool MyDB_BPlusTreeReaderWriter :: discoverPages (int whichPage, vector <MyDB_PageReaderWriter> &list, MyDB_AttValPtr low, MyDB_AttValPtr high) {
