@@ -165,7 +165,7 @@ int main (int numArgs, char **args) {
 						// print it out
 						final->printSFWQuery ();
 						cout << "\t ------------check semantics------------\n";
-						final->checkSFWQuery ();
+						final->checkSFWQuery (myCatalog);
 						cout << "\t ------------result above------------\n";
 					}
 

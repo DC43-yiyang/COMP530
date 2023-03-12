@@ -303,7 +303,6 @@ public:
 
 	void checkSFWQuery(MyDB_CatalogPtr cPtr) {
 		ExprTree::CatalogPtr = cPtr;
-
 		myQuery.check();
 	}
 
