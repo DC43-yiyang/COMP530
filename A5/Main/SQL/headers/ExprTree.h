@@ -33,6 +33,15 @@ public:
 	bool checkTypeEqual(ExprTreePtr opn, string type) {
 		return (opn->getType() == type) ? true : false;
 	}
+
+	void errorMessage(ExprTreePtr lhs, ExprTreePtr rhs, string opr){
+		cout << "The operator " << opr << "doesn't match with " << lhs->toString() << "and" << rhs->toString() << endl;
+	}
+	
+	void errorMessage(ExprTreePtr opn, string opr){
+		cout << "The operator " << opr << "doesn't used on " << opn->toString() << endl;
+	}
+
 };
 
 class BoolLiteral : public ExprTree {
