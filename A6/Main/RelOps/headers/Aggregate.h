@@ -54,6 +54,12 @@ public:
 	// execute the aggregation
 	void run ();
 
+private:
+	MyDB_TableReaderWriterPtr input;
+	MyDB_TableReaderWriterPtr output;
+	vector <pair <MyDB_AggType, string>> aggsToCompute;
+	vector <string> groupings;
+	string selectionPredicate;
 };
 
 #endif

@@ -31,6 +31,14 @@ public:
 	// execute the selection operation
 	void run ();
 
+private:
+
+	MyDB_BPlusTreeReaderWriterPtr input;
+	MyDB_TableReaderWriterPtr output;
+	MyDB_AttValPtr low;
+	MyDB_AttValPtr high;
+	string selectionPredicate;
+	vector <string> projections;
 };
 
 #endif
