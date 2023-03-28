@@ -13,6 +13,7 @@
 #include "MyDB_RecordIteratorAlt.h"
 #include "MyDB_Table.h"
 #include "MyDB_TableReaderWriter.h"
+#include <algorithm>
 
 // create a smart pointer for the catalog
 using namespace std;
