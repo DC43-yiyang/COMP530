@@ -159,7 +159,7 @@ int main (int numArgs, char **args) {
        								   allTables [tableName], myMgr);
     								allTableReaderWriters[tableName] = allBPlusReaderWriters[tableName];
   							}
-  							out << "Added table " << final->addToCatalog (args[2], myCatalog) << "\n";
+  							cout << "Added table " << final->addToCatalog (args[2], myCatalog) << "\n";
 						}
 
 					} else if (final->isSFWQuery ()) {
