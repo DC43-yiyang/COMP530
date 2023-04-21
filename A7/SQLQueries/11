@@ -1,0 +1,22 @@
+
+select
+	l1.l_shipmode,
+	sum (1)
+from
+	orders as o,
+	lineitem as l1,
+	lineitem as l2,
+	customer as c,
+	nation as n
+where
+	(o.o_orderkey = l1.l_orderkey)
+	and (o.o_orderkey = l1.l_orderkey)
+	and (o.o_orderstatus = "F")
+	and (l1.l_shipmode = "TRUCK")
+	and (l1.l_receiptdate = "1996-06-20")
+	and (l2.l_shipmode = "RAIL")
+	and (c.c_custkey = o.o_custkey)
+	and (n.n_nationkey = c.c_nationkey)
+	and (n.n_name = "JAPAN")
+group by
+	l1.l_shipmode;
