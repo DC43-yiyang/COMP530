@@ -1,187 +1,215 @@
 
 #include "Lexer.h"
-#include "Parser.h"
-#include "ParserTypes.h"
+#include "MyDB_BPlusTreeReaderWriter.h"
 #include "MyDB_BufferManager.h"
 #include "MyDB_TableReaderWriter.h"
-#include "MyDB_BPlusTreeReaderWriter.h"
-#include <string>      
-#include <iostream>   
-#include <sstream>
+#include "Parser.h"
+#include "ParserTypes.h"
 #include <algorithm>
+#include <chrono>
+#include <iostream>
 #include <iterator>
+#include <sstream>
+#include <string>
 
 using namespace std;
-string toLower (string data) {
-	transform(data.begin(), data.end(), data.begin(), ::tolower);
-	return data;
+string toLower(string data) {
+  transform(data.begin(), data.end(), data.begin(), ::tolower);
+  return data;
 }
 
-int main (int numArgs, char **args) {
+int main(int numArgs, char **args) {
 
+  // make sure we have the correct arguments
+  if (numArgs != 3) {
+    cout << "args: catalog_file directory_for_tables\n";
+    return 0;
+  }
 
-	// make sure we have the correct arguments
-	if (numArgs != 3) {
-		cout << "args: catalog_file directory_for_tables\n";
-		return 0;
-	}
+  // open up the catalog file
+  MyDB_CatalogPtr myCatalog = make_shared<MyDB_Catalog>(args[1]);
 
-	// open up the catalog file
-	MyDB_CatalogPtr myCatalog = make_shared <MyDB_Catalog> (args [1]);
+  // start up the buffer manager
+  MyDB_BufferManagerPtr myMgr = make_shared<MyDB_BufferManager>(131072, 4028, "tempFile");
 
-	// start up the buffer manager
-	MyDB_BufferManagerPtr myMgr = make_shared <MyDB_BufferManager> (131072, 4028, "tempFile");
+  // and create tables for everything in the database
+  static map<string, MyDB_TablePtr> allTables = MyDB_Table ::getAllTables(myCatalog);
 
-	// and create tables for everything in the database
-	static map <string, MyDB_TablePtr> allTables = MyDB_Table :: getAllTables (myCatalog);
+  // this is all of the tables
+  static map<string, MyDB_TableReaderWriterPtr> allTableReaderWriters;
 
-	// this is all of the tables
-	static map <string, MyDB_TableReaderWriterPtr> allTableReaderWriters;
+  // and this is just the B+-Trees
+  static map<string, MyDB_BPlusTreeReaderWriterPtr> allBPlusReaderWriters;
 
-	// and this is just the B+-Trees
-	static map <string, MyDB_BPlusTreeReaderWriterPtr> allBPlusReaderWriters;
+  // load 'em up
+  for (auto &a : allTables) {
+    if (a.second->getFileType() == "heap") {
+      allTableReaderWriters[a.first] = make_shared<MyDB_TableReaderWriter>(a.second, myMgr);
+    } else if (a.second->getFileType() == "bplustree") {
+      allBPlusReaderWriters[a.first] = make_shared<MyDB_BPlusTreeReaderWriter>(a.second->getSortAtt(), a.second, myMgr);
+      allTableReaderWriters[a.first] = allBPlusReaderWriters[a.first];
+    }
+  }
 
-	// load 'em up
-	for (auto &a : allTables) {
-		if (a.second->getFileType () == "heap") {
-			allTableReaderWriters[a.first] =  make_shared <MyDB_TableReaderWriter> (a.second, myMgr);
-		} else if (a.second->getFileType () == "bplustree") {
-			allBPlusReaderWriters[a.first] = make_shared <MyDB_BPlusTreeReaderWriter> (a.second->getSortAtt (), a.second, myMgr);
-			allTableReaderWriters[a.first] = allBPlusReaderWriters[a.first];	
-		}
-	}
+  // print out the intro notification
+  cout << "\n          Welcome to MyDB v0.1\n\n";
+  cout << "\"Not the worst database in the world\" (tm) \n\n";
 
-	// print out the intro notification
-	cout << "\n          Welcome to MyDB v0.1\n\n";
-	cout << "\"Not the worst database in the world\" (tm) \n\n";
+  // and repeatedly accept queries
+  while (true) {
 
-	// and repeatedly accept queries
-	while (true) {
-		
-		cout << "MyDB> ";
+    cout << "MyDB> ";
 
-		// this will be used to collect the query
-		stringstream ss;
+    // this will be used to collect the query
+    stringstream ss;
 
-		// get a line
-		for (string line; getline (cin, line);) {
-			
-			// see if it has a ";" at the end
-			size_t pos = line.find (';');
+    // get a line
+    for (string line; getline(cin, line);) {
 
-			// it does!!  so we are ready yo parse
-			if (pos != string :: npos) {
+      // see if it has a ";" at the end
+      size_t pos = line.find(';');
 
-				// append the last line
-				line.resize (pos);
-				ss << line;
+      // it does!!  so we are ready yo parse
+      if (pos != string ::npos) {
 
-				// see if someone wants to load a file
-				vector <string> tokens {istream_iterator<string>{ss},
-					istream_iterator<string>{}};
+        // append the last line
+        line.resize(pos);
+        ss << line;
 
-				// see if we got a "quit" or "exit"
-				if (tokens.size () == 1 && (toLower (tokens[0]) == "exit" || toLower (tokens[0]) == "quit")) {
-					cout << "OK, goodbye.\n";
-					// before we get outta here, write everything into the catalog
-					for (auto &a : allTables) {
-						a.second->putInCatalog (myCatalog);
-					}
-					return 0;
-				}
+        // see if someone wants to load a file
+        vector<string> tokens{istream_iterator<string>{ss},
+                              istream_iterator<string>{}};
 
-				// see if we got a "load soandso from afile"
-				if (tokens.size () == 4 && toLower(tokens[0]) == "load" && toLower(tokens[2]) == "from") {
+        // see if we got a "quit" or "exit"
+        if (tokens.size() == 1 && (toLower(tokens[0]) == "exit" || toLower(tokens[0]) == "quit")) {
+          cout << "OK, goodbye.\n";
+          // before we get outta here, write everything into the catalog
+          for (auto &a : allTables) {
+            a.second->putInCatalog(myCatalog);
+          }
+          return 0;
+        }
 
-					// make sure the table is there
-					if (allTableReaderWriters.count (tokens[1]) == 0) {
-						cout << "Could not find table " << tokens[1] << ".\n";
-						break;
-					} else {
-						cout << "OK, loading " << tokens[1] << " from text file.\n";
+        // see if we got a "load soandso from afile"
+        if (tokens.size() == 4 && toLower(tokens[0]) == "load" && toLower(tokens[2]) == "from") {
 
-						// load up the file
-						pair <vector <size_t>, size_t> res = allTableReaderWriters[tokens[1]]->loadFromTextFile (tokens[3]);
+          // make sure the table is there
+          if (allTableReaderWriters.count(tokens[1]) == 0) {
+            cout << "Could not find table " << tokens[1] << ".\n";
+            break;
+          } else {
+            cout << "OK, loading " << tokens[1] << " from text file.\n";
 
-						// and record the tuple various counts
-						allTableReaderWriters[tokens[1]]->getTable ()->setDistinctValues (res.first);
-						allTableReaderWriters[tokens[1]]->getTable ()->setTupleCount (res.second);
-						break;
-					}
-				}
+            // load up the file
+            pair<vector<size_t>, size_t> res = allTableReaderWriters[tokens[1]]->loadFromTextFile(tokens[3]);
 
-				// get the string to parse
-				string parseMe = ss.str ();
+            // and record the tuple various counts
+            allTableReaderWriters[tokens[1]]->getTable()->setDistinctValues(res.first);
+            allTableReaderWriters[tokens[1]]->getTable()->setTupleCount(res.second);
+            // DEBUG_MSG("FINISH LOAD FROM TEXT FILE");
+            break;
+          }
+        }
 
-				// see if we got a load-from
-				
-				// add an extra zero at the end; needed by lexer
-				parseMe.push_back ('\0');
+        // get the string to parse
+        string parseMe = ss.str();
 
-				// now parse it
-				yyscan_t scanner;
-				LexerExtra extra { "" };
-				yylex_init_extra (&extra, &scanner);
-				const YY_BUFFER_STATE buffer { yy_scan_string (parseMe.data(), scanner) };
-				SQLStatement *final = nullptr;
-				const int parseFailed { yyparse (scanner, &final) };
-				yy_delete_buffer (buffer, scanner);
-				yylex_destroy (scanner);
+        // see if we got a load-from
 
-				// if we did not parse correctly
-				if (parseFailed) {
+        // add an extra zero at the end; needed by lexer
+        parseMe.push_back('\0');
 
-					// print out the parse error
-					cout << "Parse error: " << extra.errorMessage;
+        // now parse it
+        yyscan_t scanner;
+        LexerExtra extra{""};
+        yylex_init_extra(&extra, &scanner);
+        const YY_BUFFER_STATE buffer{yy_scan_string(parseMe.data(), scanner)};
+        SQLStatement *final = nullptr;
+        const int parseFailed{yyparse(scanner, &final)};
+        yy_delete_buffer(buffer, scanner);
+        yylex_destroy(scanner);
 
-					// get outta here
-					if (final != nullptr)
-						delete final;
-					break;
+        // if we did not parse correctly
+        if (parseFailed) {
 
-				// if we did parse correctly, just print out the query
-				} else {
+          // print out the parse error
+          cout << "Parse error: " << extra.errorMessage;
 
-					// see if we got a create table
-					if (final->isCreateTable ()) {
+          // get outta here
+          if (final != nullptr)
+            delete final;
+          break;
 
-						string tableName = final->addToCatalog (args[2], myCatalog);
-						MyDB_TablePtr temp = make_shared <MyDB_Table> ();
-						temp->fromCatalog (tableName, myCatalog);
-						if (tableName != "nothing") {
-							allTables[tableName] = temp;
-							if (allTables [tableName]->getFileType () == "heap") {
-								allTableReaderWriters[tableName] = make_shared 
-       								   <MyDB_TableReaderWriter> (allTables [tableName], myMgr);
-  							} else if (allTables [tableName]->getFileType () == "bplustree") {
-    								allBPlusReaderWriters[tableName] = make_shared 
-       								   <MyDB_BPlusTreeReaderWriter> (allTables [tableName]->getSortAtt (), 
-       								   allTables [tableName], myMgr);
-    								allTableReaderWriters[tableName] = allBPlusReaderWriters[tableName];
-  							}
-  							cout << "Added table " << final->addToCatalog (args[2], myCatalog) << "\n";
-						}
+          // if we did parse correctly, just print out the query
+        } else {
 
-					} else if (final->isSFWQuery ()) {
+          // see if we got a create table
+          if (final->isCreateTable()) {
 
-						LogicalOpPtr myPlan = final->buildLogicalQueryPlan (allTables, allTableReaderWriters);
-						if (myPlan != nullptr) {
-							auto res = myPlan->cost ();
-							cout << "cost was " << res.first << "\n";
-						}
-					}
+            string tableName = final->addToCatalog(args[2], myCatalog);
+            MyDB_TablePtr temp = make_shared<MyDB_Table>();
+            temp->fromCatalog(tableName, myCatalog);
+            if (tableName != "nothing") {
+              allTables[tableName] = temp;
+              if (allTables[tableName]->getFileType() == "heap") {
+                allTableReaderWriters[tableName] = make_shared<MyDB_TableReaderWriter>(allTables[tableName], myMgr);
+              } else if (allTables[tableName]->getFileType() == "bplustree") {
+                allBPlusReaderWriters[tableName] = make_shared<MyDB_BPlusTreeReaderWriter>(allTables[tableName]->getSortAtt(),
+                                                                                           allTables[tableName], myMgr);
+                allTableReaderWriters[tableName] = allBPlusReaderWriters[tableName];
+              }
+              cout << "Added table " << final->addToCatalog(args[2], myCatalog) << "\n";
+            }
 
-					// get outta here
-					if (final != nullptr)
-						delete final;
-					break;
-				}
+          } else if (final->isSFWQuery()) {
 
-			} else {
-				ss << line << "\n";
-				cout << "    > ";
-			}
-		}
-	}
+            auto begin = std::chrono::steady_clock::now();
 
+            LogicalOpPtr myPlan = final->buildLogicalQueryPlan(allTables, allTableReaderWriters);
+
+            auto end1 = std::chrono::steady_clock::now();
+
+            if (myPlan != nullptr) {
+              auto res = myPlan->cost();
+              cout << "\ncost was " << res.first << "\n\n";
+              MyDB_TableReaderWriterPtr output;
+              size_t count;
+              tie(output, count) = myPlan->execute();
+              auto end2 = std::chrono::steady_clock::now();
+
+              auto temp = output->getEmptyRecord();
+              auto iter = output->getIterator(temp);
+
+              cout << "\nFirst 30 Results:" << endl;
+
+              int counter = 0;
+              while (iter->hasNext() && counter < 30) {
+                iter->getNext();
+                cout << temp << endl;
+                counter++;
+              }
+
+              cout << endl;
+              cout << count << " rows retrieved in " << (double)chrono::duration_cast<chrono::milliseconds>(end2 - begin).count() / 1000.0 << " s." << endl;
+              cout << "Query Optimization: " << (double)chrono::duration_cast<chrono::milliseconds>(end1 - begin).count() / 1000.0 << " s." << endl;
+              cout << "Data Retrieving: " << (double)chrono::duration_cast<chrono::milliseconds>(end2 - end1).count() / 1000.0 << " s." << endl;
+              cout << endl;
+
+              // release disk space after consuming output table
+              myMgr->killTable(output->getTable());
+            }
+          }
+
+          // get outta here
+
+          delete final;
+          break;
+        }
+
+      } else {
+        ss << line << "\n";
+        cout << "    > ";
+      }
+    }
+  }
 }
