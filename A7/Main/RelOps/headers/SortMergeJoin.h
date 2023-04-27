@@ -40,7 +40,7 @@ public:
 		string rightSelectionPredicate);
 	
 	// execute the join
-	void run ();
+	size_t run ();
 
 private:
 

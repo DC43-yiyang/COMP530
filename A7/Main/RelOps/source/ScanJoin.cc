@@ -14,11 +14,13 @@ ScanJoin :: ScanJoin (MyDB_TableReaderWriterPtr leftInputIn, MyDB_TableReaderWri
                 MyDB_TableReaderWriterPtr outputIn, string finalSelectionPredicateIn,
 		vector <string> projectionsIn,
                 vector <pair <string, string>> equalityChecksIn, string leftSelectionPredicateIn,
-                string rightSelectionPredicateIn) {
+                string rightSelectionPredicateIn,
+				size_t countInput) {
 
 	output = outputIn;
 	finalSelectionPredicate = finalSelectionPredicateIn;
 	projections = projectionsIn;
+	count = countInput;
 
 	// we need to make sure that the left table is smaller
 
@@ -49,8 +51,8 @@ ScanJoin :: ScanJoin (MyDB_TableReaderWriterPtr leftInputIn, MyDB_TableReaderWri
 	}
 }
 
-void ScanJoin :: run () {
-
+size_t ScanJoin :: run () {
+	size_t count = 0;
 	// this is the hash map we'll use to look up data... the key is the hashed value
 	// of all of the records' join keys, and the value is a list of pointers were all
 	// of the records with that hsah value are located
@@ -168,7 +170,7 @@ void ScanJoin :: run () {
 
 			// check to see if it is accepted by the join predicate
 			if (finalPredicate ()->toBool ()) {
-
+				count ++;
 				// run all of the computations
 				int i = 0;
 				for (auto &f : finalComputations) {
@@ -185,6 +187,7 @@ void ScanJoin :: run () {
 			}
 		}
 	}
+	return count;
 }
 
 #endif

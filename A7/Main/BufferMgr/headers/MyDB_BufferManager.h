@@ -64,6 +64,9 @@ public:
 	// 3) temporary pages are written to the file tempFile
 	MyDB_BufferManager (size_t pageSize, size_t numPages, string tempFile);
 	
+	// returns the available number of pages
+	size_t getMaxPossiblePages () const { return lastUsed.size() + availableRam.size(); }
+
 	// when the buffer manager is destroyed, all of the dirty pages need to be
 	// written back to disk, and any temporary files need to be deleted
 	~MyDB_BufferManager ();
@@ -116,7 +119,7 @@ private:
 
 	// process an access to the given page
 	void access (MyDB_PagePtr updateMe);
-
+	
 	// removes all traces of the page from the buffer manager
 	void killPage (MyDB_PagePtr killMe);
 

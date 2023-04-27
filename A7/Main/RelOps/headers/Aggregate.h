@@ -52,7 +52,7 @@ public:
 		vector <string> groupings, string selectionPredicate);
 	
 	// execute the aggregation
-	void run ();
+	size_t run ();
 
 private:
 

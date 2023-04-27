@@ -81,10 +81,11 @@ public:
 		MyDB_TableReaderWriterPtr output, string finalSelectionPredicate, 
 		vector <string> projections,
 		vector <pair <string, string>> equalityChecks, string leftSelectionPredicate,
-		string rightSelectionPredicate);
+		string rightSelectionPredicate,
+		size_t countInput);
 	
 	// execute the join
-	void run ();
+	size_t run ();
 
 private:
 
@@ -97,6 +98,7 @@ private:
 	string leftSelectionPredicate;
 	string rightSelectionPredicate;
 	bool hadToSwapThem;
+	size_t count;
 };
 
 #endif

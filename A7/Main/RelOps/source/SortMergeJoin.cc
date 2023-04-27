@@ -27,8 +27,9 @@ SortMergeJoin :: SortMergeJoin (MyDB_TableReaderWriterPtr leftInputIn, MyDB_Tabl
 	runSize = leftTable->getBufferMgr ()->numPages / 2;
 }
 
-void SortMergeJoin :: run () {
+size_t SortMergeJoin :: run () {
 
+	size_t cnt = 0;
 	// get two left input records
 	MyDB_RecordPtr leftInputRec = leftTable->getEmptyRecord ();
 	MyDB_RecordPtr leftInputRecOther = leftTable->getEmptyRecord ();
@@ -82,7 +83,7 @@ void SortMergeJoin :: run () {
 
 	// if we have no results...
 	if (!left->advance () || !right->advance ())
-		return;
+		return cnt;
 	
 	// otherwise, loop until one side is exhausted
 	while (true) {
@@ -164,6 +165,7 @@ void SortMergeJoin :: run () {
 						myIterAgain->getCurrent (leftInputRec);		
 						if (finalPredicate ()->toBool ()) {
 							// got one!!
+							cnt ++;
 							int i = 0;
 							for (auto &f : finalComputations) {
 								outputRec->getAtt (i++)->set (f());
@@ -193,7 +195,7 @@ void SortMergeJoin :: run () {
 		// at this point, we check to see if we have completed
 		if (allDone)
 			break;
-		
+		return cnt;
 	}
 	
 }

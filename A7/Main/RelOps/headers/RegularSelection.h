@@ -24,7 +24,7 @@ public:
 		string selectionPredicate, vector <string> projections);
 	
 	// execute the selection operation
-	void run ();
+	size_t run ();
 
 private:
 

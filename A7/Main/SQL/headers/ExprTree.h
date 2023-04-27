@@ -29,6 +29,7 @@ public:
 	virtual bool isNotEq () {return false;}
 	virtual bool isSum () {return false;}
 	virtual bool isAvg () {return false;}
+	virtual MyDB_AttValPtr getLiteral() {return nullptr;}
 	virtual string getId () {return "";}
 	virtual ExprTreePtr getLHS () {return nullptr;}
 	virtual ExprTreePtr getRHS () {return nullptr;}
@@ -50,6 +51,34 @@ public:
 			res = res || child->hasAgg (); 
 		return res;
 	} 
+
+	  virtual vector<ExprTreePtr> getAggExprs() {
+    if (isSum() || isAvg())
+      return {shared_from_this()};
+    if (getChild())
+      return getChild()->getAggExprs();
+    if (getLHS() && getRHS()) {
+      vector<ExprTreePtr> vec1 = getLHS()->getAggExprs();
+      vector<ExprTreePtr> vec2 = getRHS()->getAggExprs();
+      vec1.insert(vec1.end(), make_move_iterator(vec2.begin()), make_move_iterator(vec2.end()));
+      return vec1;
+    }
+    return {};
+  }
+
+  virtual vector<ExprTreePtr> getIdentifiers() {
+    if (isId())
+      return {shared_from_this()};
+    if (getChild())
+      return getChild()->getIdentifiers();
+    if (getLHS() && getRHS()) {
+      vector<ExprTreePtr> vec1 = getLHS()->getIdentifiers();
+      vector<ExprTreePtr> vec2 = getRHS()->getIdentifiers();
+      vec1.insert(vec1.end(), make_move_iterator(vec2.begin()), make_move_iterator(vec2.end()));
+      return vec1;
+    }
+    return {};
+  }
 };
 
 class BoolLiteral : public ExprTree {
@@ -69,6 +98,11 @@ public:
 			return "bool[false]";
 		}
 	}	
+  	MyDB_AttValPtr getLiteral() override {
+    	auto value = make_shared<MyDB_BoolAttVal>();
+    	value->set(myVal);
+    	return value;
+  	}
 };
 
 class DoubleLiteral : public ExprTree {
@@ -86,6 +120,12 @@ public:
 	}	
 
 	~DoubleLiteral () {}
+
+	MyDB_AttValPtr getLiteral() override {
+		auto value = make_shared<MyDB_DoubleAttVal>();
+		value->set(myVal);
+		return value;
+  	}
 };
 
 // this implement class ExprTree
@@ -104,6 +144,11 @@ public:
 	}
 
 	~IntLiteral () {}
+	MyDB_AttValPtr getLiteral() override {
+		auto value = make_shared<MyDB_IntAttVal>();
+		value->set(myVal);
+		return value;
+  	}
 };
 
 class StringLiteral : public ExprTree {
@@ -122,6 +167,12 @@ public:
 	}
 
 	~StringLiteral () {}
+	
+	MyDB_AttValPtr getLiteral() override {
+		auto value = make_shared<MyDB_StringAttVal>();
+		value->set(myVal);
+		return value;
+  	}
 };
 
 class Identifier : public ExprTree {
@@ -661,6 +712,9 @@ public:
 
 
 	~SumOp () {}
+	ExprTreePtr getChild () {
+		return child;
+	}
 };
 
 class AvgOp : public ExprTree {
@@ -692,6 +746,10 @@ public:
 	}
 
 	~AvgOp () {}
+
+	ExprTreePtr getChild () {
+		return child;
+	}
 };
 
 #endif

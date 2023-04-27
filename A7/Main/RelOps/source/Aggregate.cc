@@ -22,12 +22,12 @@ Aggregate :: Aggregate (MyDB_TableReaderWriterPtr inputIn, MyDB_TableReaderWrite
 
 }
 
-void Aggregate :: run () {
-
+size_t Aggregate :: run () {
+	size_t counter = 0;
 	// make sure that the number of attributes is OK
 	if (output->getTable ()->getSchema ()->getAtts ().size () != aggsToCompute.size () + groupings.size ()) {
 		cout << "error, the output schema needs to have the same number of atts as (# of aggs to compute + # groups).\n";
-		return;
+		return 0;
 	}
 
 	// first, we create a schema for the aggregate records... this is all grouping atts,
@@ -201,7 +201,7 @@ void Aggregate :: run () {
 	// loop through all of the aggregate records
 	MyDB_RecordPtr outRec = output->getEmptyRecord ();
 	while (myIterAgain->advance ()) {
-
+		counter++;
 		myIterAgain->getCurrent (aggRec);
 
 		// set the grouping atts
@@ -216,6 +216,7 @@ void Aggregate :: run () {
 		outRec->recordContentHasChanged ();
 		output->append (outRec);
 	}
+	return counter;
 }
 
 #endif

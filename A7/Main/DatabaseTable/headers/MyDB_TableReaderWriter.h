@@ -84,7 +84,9 @@ public:
 	MyDB_BufferManagerPtr getBufferMgr ();
 
 	// gets the physical file for this guy
-	string getFileName ();
+	string getFileName (){
+		return forMe->getStorageLoc ();
+	}
 	
 	// gets the table object for this guy
 	MyDB_TablePtr getTable ();

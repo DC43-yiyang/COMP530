@@ -13,8 +13,8 @@ RegularSelection :: RegularSelection (MyDB_TableReaderWriterPtr inputIn, MyDB_Ta
 	projections = projectionsIn;
 }
 
-void RegularSelection :: run () {
-
+size_t RegularSelection :: run () {
+	size_t cnt = 0;
 	MyDB_RecordPtr inputRec = input->getEmptyRecord ();
 	MyDB_RecordPtr outputRec = output->getEmptyRecord ();
 	
@@ -35,7 +35,7 @@ void RegularSelection :: run () {
 		if (!pred()->toBool ()) {
 			continue;
 		}
-
+		cnt++;
 		// run all of the computations
 		int i = 0;
 		for (auto &f : finalComputations) {
@@ -45,6 +45,7 @@ void RegularSelection :: run () {
 		outputRec->recordContentHasChanged ();
 		output->append (outputRec);
 	}
+	return cnt;
 }
 
 #endif
