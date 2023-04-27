@@ -184,25 +184,5 @@ private:
   vector<string> exprsToCompute;
   string tableAlias;
 };
-// the top level
-class LogicalFinalScan : public LogicalOp {
-public:
-  LogicalFinalScan(LogicalOpPtr inputOp, MyDB_TablePtr outputSpec,
-                   vector<string> &exprsToCompute, string tableAlias)
-      : inputOp(inputOp),
-        outputSpec(outputSpec),
-        exprsToCompute(exprsToCompute),
-        tableAlias(tableAlias) {}
 
-  pair<double, MyDB_StatsPtr> cost();
-
-  tuple<MyDB_TableReaderWriterPtr, size_t> execute();
-
-private:
-  LogicalOpPtr inputOp;
-  MyDB_TablePtr outputSpec;
-  MyDB_StatsPtr inputStats;
-  vector<string> exprsToCompute;
-  string tableAlias;
-};
 #endif

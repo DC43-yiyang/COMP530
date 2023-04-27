@@ -1,6 +1,3 @@
--- you need to create a directory called TPC-H , which includes all the TPC-H database files. And put it in the Build directory.
-
-
 LOAD lineitem FROM TPC-H/lineitem.tbl;
 LOAD orders FROM TPC-H/orders.tbl;
 
