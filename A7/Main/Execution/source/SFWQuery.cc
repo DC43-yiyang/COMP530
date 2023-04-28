@@ -12,11 +12,13 @@
 #include <unordered_set>
 #include <vector>
 
-vector<pair<unordered_set<int>, unordered_set<int>>> generateSubsets(int n) {
+vector<pair<unordered_set<int>, unordered_set<int>>> generateSubsets(int n)
+{
   assert(n >= 2);
   int count = (int)pow(2, n);
   vector<pair<unordered_set<int>, unordered_set<int>>> allSubsets;
-  for (int i = 0; i < count; i++) {
+  for (int i = 0; i < count; i++)
+  {
     unordered_set<int> leftSet;
     unordered_set<int> rightSet;
 
@@ -37,10 +39,12 @@ vector<pair<unordered_set<int>, unordered_set<int>>> generateSubsets(int n) {
 LogicalOpPtr SFWQuery ::optimize(vector<ExprTreePtr> valuesToSelect,
                                  vector<pair<string, string>> tables,
                                  vector<ExprTreePtr> cnf,
-                                 int totTables) {
+                                 int totTables)
+{
   LogicalOpPtr bestOp = nullptr;
   double bestCost = numeric_limits<double>::max();
-  if (tables.size() == 1) {
+  if (tables.size() == 1)
+  {
     // no opt
     string tableName = tables[0].first;
     string tableAlias = tables[0].second;
@@ -50,9 +54,12 @@ LogicalOpPtr SFWQuery ::optimize(vector<ExprTreePtr> valuesToSelect,
     vector<string> myExprs;
 
     MyDB_SchemaPtr outputScheme = make_shared<MyDB_Schema>();
-    for (const auto &expr : valuesToSelect) {
-      for (const auto &inputAtt : inputTable->getSchema()->getAtts()) {
-        if (expr->referencesAtt(tableAlias, inputAtt.first)) {
+    for (const auto &expr : valuesToSelect)
+    {
+      for (const auto &inputAtt : inputTable->getSchema()->getAtts())
+      {
+        if (expr->referencesAtt(tableAlias, inputAtt.first))
+        {
           outputScheme->getAtts().emplace_back(tableAlias + "_" + inputAtt.first, inputAtt.second);
           myExprs.emplace_back("[" + inputAtt.first + "]");
         }
@@ -68,11 +75,13 @@ LogicalOpPtr SFWQuery ::optimize(vector<ExprTreePtr> valuesToSelect,
     if (totTables == 1)
       finalScheme = outputScheme;
     return myOp;
-
-  } else {
+  }
+  else
+  {
 
     auto allPartitions = generateSubsets((int)tables.size());
-    for (const auto &partitions : allPartitions) {
+    for (const auto &partitions : allPartitions)
+    {
       vector<pair<string, string>> leftTables;
       vector<pair<string, string>> rightTables;
       for (int i : partitions.first)
@@ -86,13 +95,12 @@ LogicalOpPtr SFWQuery ::optimize(vector<ExprTreePtr> valuesToSelect,
       MyDB_SchemaPtr rightSchema = make_shared<MyDB_Schema>();
       MyDB_SchemaPtr topSchema = make_shared<MyDB_Schema>();
 
-      for (auto c : cnf) {
-        bool inLeft = any_of(leftTables.begin(), leftTables.end(), [&c](const pair<string, string> &table) {
-          return c->referencesTable(table.second);
-        });
-        bool inRight = any_of(rightTables.begin(), rightTables.end(), [&c](const pair<string, string> &table) {
-          return c->referencesTable(table.second);
-        });
+      for (auto c : cnf)
+      {
+        bool inLeft = any_of(leftTables.begin(), leftTables.end(), [&c](const pair<string, string> &table)
+                             { return c->referencesTable(table.second); });
+        bool inRight = any_of(rightTables.begin(), rightTables.end(), [&c](const pair<string, string> &table)
+                              { return c->referencesTable(table.second); });
         if (inLeft && inRight)
           topCNF.push_back(c);
         else if (inLeft)
@@ -101,50 +109,54 @@ LogicalOpPtr SFWQuery ::optimize(vector<ExprTreePtr> valuesToSelect,
           rightCNF.push_back(c);
       }
 
-      for (auto leftTableName : leftTables) {
+      for (auto leftTableName : leftTables)
+      {
         auto leftTable = allTables[leftTableName.first];
-        for (auto att : leftTable->getSchema()->getAtts()) {
+        for (auto att : leftTable->getSchema()->getAtts())
+        {
 
-          bool inSelect = any_of(valuesToSelect.begin(), valuesToSelect.end(), [&att, &leftTableName](const ExprTreePtr &exp) {
-            return exp->referencesAtt(leftTableName.second, att.first);
-          });
-          bool inCNF = any_of(cnf.begin(), cnf.end(), [&att, &leftTableName](const ExprTreePtr &exp) {
-            return exp->referencesAtt(leftTableName.second, att.first);
-          });
+          bool inSelect = any_of(valuesToSelect.begin(), valuesToSelect.end(), [&att, &leftTableName](const ExprTreePtr &exp)
+                                 { return exp->referencesAtt(leftTableName.second, att.first); });
+          bool inCNF = any_of(cnf.begin(), cnf.end(), [&att, &leftTableName](const ExprTreePtr &exp)
+                              { return exp->referencesAtt(leftTableName.second, att.first); });
 
           ExprTreePtr idExp = make_shared<Identifier>(strdup(leftTableName.second.c_str()), strdup(att.first.c_str()));
 
-          if (inSelect || inCNF) {
+          if (inSelect || inCNF)
+          {
             leftSchema->getAtts().emplace_back(leftTableName.second + "_" + att.first, att.second);
             leftExprs.push_back(idExp);
           }
 
-          if (inSelect) {
+          if (inSelect)
+          {
             topSchema->getAtts().emplace_back(leftTableName.second + "_" + att.first, att.second);
             topExprs.push_back(idExp);
           }
         }
       }
 
-      for (auto rightTableName : rightTables) {
+      for (auto rightTableName : rightTables)
+      {
         auto rightTable = allTables[rightTableName.first];
-        for (auto att : rightTable->getSchema()->getAtts()) {
+        for (auto att : rightTable->getSchema()->getAtts())
+        {
 
-          bool inSelect = any_of(valuesToSelect.begin(), valuesToSelect.end(), [&att, &rightTableName](const ExprTreePtr &exp) {
-            return exp->referencesAtt(rightTableName.second, att.first);
-          });
-          bool inCNF = any_of(cnf.begin(), cnf.end(), [&att, &rightTableName](const ExprTreePtr &exp) {
-            return exp->referencesAtt(rightTableName.second, att.first);
-          });
+          bool inSelect = any_of(valuesToSelect.begin(), valuesToSelect.end(), [&att, &rightTableName](const ExprTreePtr &exp)
+                                 { return exp->referencesAtt(rightTableName.second, att.first); });
+          bool inCNF = any_of(cnf.begin(), cnf.end(), [&att, &rightTableName](const ExprTreePtr &exp)
+                              { return exp->referencesAtt(rightTableName.second, att.first); });
 
           ExprTreePtr idExp = make_shared<Identifier>(strdup(rightTableName.second.c_str()), strdup(att.first.c_str()));
 
-          if (inSelect || inCNF) {
+          if (inSelect || inCNF)
+          {
             rightSchema->getAtts().emplace_back(rightTableName.second + "_" + att.first, att.second);
             rightExprs.push_back(idExp);
           }
 
-          if (inSelect) {
+          if (inSelect)
+          {
             topSchema->getAtts().emplace_back(rightTableName.second + "_" + att.first, att.second);
             topExprs.push_back(idExp);
           }
@@ -155,14 +167,12 @@ LogicalOpPtr SFWQuery ::optimize(vector<ExprTreePtr> valuesToSelect,
       LogicalOpPtr rightOp = optimize(rightExprs, rightTables, rightCNF, totTables);
 
       string leftTableNames = leftTables[0].second;
-      for_each(leftTables.begin() + 1, leftTables.end(), [&leftTableNames](const pair<string, string> &p) {
-        leftTableNames += ("_" + p.second);
-      });
+      for_each(leftTables.begin() + 1, leftTables.end(), [&leftTableNames](const pair<string, string> &p)
+               { leftTableNames += ("_" + p.second); });
 
       string rightTableNames = rightTables[0].second;
-      for_each(rightTables.begin() + 1, rightTables.end(), [&rightTableNames](const pair<string, string> &p) {
-        rightTableNames += ("_" + p.second);
-      });
+      for_each(rightTables.begin() + 1, rightTables.end(), [&rightTableNames](const pair<string, string> &p)
+               { rightTableNames += ("_" + p.second); });
 
       string outputTableName = leftTableNames + "_JOIN_" + rightTableNames;
 
@@ -173,7 +183,8 @@ LogicalOpPtr SFWQuery ::optimize(vector<ExprTreePtr> valuesToSelect,
 
       auto cost = myOp->cost();
 
-      if (cost.first < bestCost) {
+      if (cost.first < bestCost)
+      {
         bestCost = cost.first;
         bestOp = myOp;
         if (tables.size() == totTables)
@@ -184,12 +195,14 @@ LogicalOpPtr SFWQuery ::optimize(vector<ExprTreePtr> valuesToSelect,
   }
 }
 
-void replace(string &s, string const &toReplace, string const &replaceWith) {
+void replace(string &s, string const &toReplace, string const &replaceWith)
+{
   ostringstream oss;
   size_t pos = 0;
   size_t prevPos = pos;
 
-  while (true) {
+  while (true)
+  {
     prevPos = pos;
     pos = s.find(toReplace, pos);
     if (pos == string::npos)
@@ -207,22 +220,21 @@ void replace(string &s, string const &toReplace, string const &replaceWith) {
 //
 // note that this implementation only works for two-table queries that do not have an aggregation
 //
-LogicalOpPtr SFWQuery ::buildLogicalQueryPlan(map<string, MyDB_TablePtr> &allTables, map<string, MyDB_TableReaderWriterPtr> &allTableReaderWriters) {
+LogicalOpPtr SFWQuery ::buildLogicalQueryPlan(map<string, MyDB_TablePtr> &allTables, map<string, MyDB_TableReaderWriterPtr> &allTableReaderWriters)
+{
   this->allTables = allTables;
   this->allTableReaderWriters = allTableReaderWriters;
 
   // remove unused tables
-  for (auto iter = tablesToProcess.begin(); iter != tablesToProcess.end();) {
+  for (auto iter = tablesToProcess.begin(); iter != tablesToProcess.end();)
+  {
     auto tableAlias = (*iter).second;
-    bool isUsed = any_of(allDisjunctions.begin(), allDisjunctions.end(), [&tableAlias](const ExprTreePtr &expr) {
-                    return expr->referencesTable(tableAlias);
-                  }) ||
-                  any_of(valuesToSelect.begin(), valuesToSelect.end(), [&tableAlias](const ExprTreePtr &expr) {
-                    return expr->referencesTable(tableAlias);
-                  }) ||
-                  any_of(groupingClauses.begin(), groupingClauses.end(), [&tableAlias](const ExprTreePtr &expr) {
-                    return expr->referencesTable(tableAlias);
-                  });
+    bool isUsed = any_of(allDisjunctions.begin(), allDisjunctions.end(), [&tableAlias](const ExprTreePtr &expr)
+                         { return expr->referencesTable(tableAlias); }) ||
+                  any_of(valuesToSelect.begin(), valuesToSelect.end(), [&tableAlias](const ExprTreePtr &expr)
+                         { return expr->referencesTable(tableAlias); }) ||
+                  any_of(groupingClauses.begin(), groupingClauses.end(), [&tableAlias](const ExprTreePtr &expr)
+                         { return expr->referencesTable(tableAlias); });
 
     if (isUsed)
       ++iter;
@@ -247,7 +259,8 @@ LogicalOpPtr SFWQuery ::buildLogicalQueryPlan(map<string, MyDB_TablePtr> &allTab
   // extract expressions from group by clauses
   unordered_map<string, string> renameTable;
   int attId = 0;
-  for (const auto &groupExpr : groupingClauses) {
+  for (const auto &groupExpr : groupingClauses)
+  {
     needAgg = true;
     string newName = "group_" + to_string(attId);
     aggScheme->getAtts().emplace_back(newName, myRecord.getType(groupExpr->toString()));
@@ -256,11 +269,14 @@ LogicalOpPtr SFWQuery ::buildLogicalQueryPlan(map<string, MyDB_TablePtr> &allTab
   }
 
   // extract identifier from group by clauses
-  for (const auto &groupExpr : groupingClauses) {
+  for (const auto &groupExpr : groupingClauses)
+  {
     needAgg = true;
-    for (const auto &idExpr : groupExpr->getIdentifiers()) {
+    for (const auto &idExpr : groupExpr->getIdentifiers())
+    {
       string idExprStr = idExpr->toString();
-      if (renameTable.find(idExprStr) == renameTable.end()) {
+      if (renameTable.find(idExprStr) == renameTable.end())
+      {
         groupingClauses.push_back(idExpr);
         assert(idExprStr.size() >= 2);
         string newName = idExprStr.substr(1, idExprStr.size() - 2);
@@ -272,13 +288,17 @@ LogicalOpPtr SFWQuery ::buildLogicalQueryPlan(map<string, MyDB_TablePtr> &allTab
   }
 
   // extract aggregate expressions from group by select clauses
-  for (auto &expr : valuesToSelect) {
+  for (auto &expr : valuesToSelect)
+  {
     auto aggExprs = expr->getAggExprs();
-    if (!aggExprs.empty()) {
+    if (!aggExprs.empty())
+    {
       needAgg = true;
-      for (const auto &aggExpr : aggExprs) {
+      for (const auto &aggExpr : aggExprs)
+      {
         string aggExprStr = aggExpr->toString();
-        if (renameTable.find(aggExprStr) == renameTable.end()) {
+        if (renameTable.find(aggExprStr) == renameTable.end())
+        {
           aggSelections.push_back(aggExpr);
           string newName = aggExprStr.substr(0, 3) + "_" + to_string(attId);
           aggScheme->getAtts().emplace_back(newName, myRecord.getType(aggExpr->toString()));
@@ -293,41 +313,55 @@ LogicalOpPtr SFWQuery ::buildLogicalQueryPlan(map<string, MyDB_TablePtr> &allTab
   for (const auto &p : renameTable)
     allRenamedKeys.push_back(p.first);
 
-  for (auto &expr : valuesToSelect) {
+  for (auto &expr : valuesToSelect)
+  {
     string exprStr = expr->toString();
-    for (const auto &renamedKeys : allRenamedKeys) {
+    for (const auto &renamedKeys : allRenamedKeys)
+    {
       replace(exprStr, renamedKeys, "[" + renameTable[renamedKeys] + "]");
     }
     finalSelections.push_back(exprStr);
   }
 
   bool needFinalSelection = true;
-  if (needAgg) {
+  if (needAgg)
+  {
     bool allIdentical = true;
-    if (finalSelections.size() == aggScheme->getAtts().size()) {
-      for (int i = 0; i < finalSelections.size(); i++) {
-        if (finalSelections[i] != "[" + aggScheme->getAtts()[i].first + "]") {
+    if (finalSelections.size() == aggScheme->getAtts().size())
+    {
+      for (int i = 0; i < finalSelections.size(); i++)
+      {
+        if (finalSelections[i] != "[" + aggScheme->getAtts()[i].first + "]")
+        {
           allIdentical = false;
           break;
         }
       }
-    } else {
+    }
+    else
+    {
       allIdentical = false;
     }
 
     needFinalSelection = !allIdentical;
-
-  } else {
+  }
+  else
+  {
 
     bool allIdentical = true;
-    if (valuesToSelect.size() == myScheme->getAtts().size()) {
-      for (int i = 0; i < valuesToSelect.size(); i++) {
-        if (valuesToSelect[i]->toString() != "[" + myScheme->getAtts()[i].first + "]") {
+    if (valuesToSelect.size() == myScheme->getAtts().size())
+    {
+      for (int i = 0; i < valuesToSelect.size(); i++)
+      {
+        if (valuesToSelect[i]->toString() != "[" + myScheme->getAtts()[i].first + "]")
+        {
           allIdentical = false;
           break;
         }
       }
-    } else {
+    }
+    else
+    {
       allIdentical = false;
     }
     needFinalSelection = !allIdentical;
@@ -338,7 +372,8 @@ LogicalOpPtr SFWQuery ::buildLogicalQueryPlan(map<string, MyDB_TablePtr> &allTab
 
   LogicalOpPtr myAgg;
 
-  if (needAgg) {
+  if (needAgg)
+  {
     myAgg = make_shared<LogicalAggregate>(
         myOp,
         make_shared<MyDB_Table>("agg", "agg.bin", aggScheme),
@@ -356,14 +391,19 @@ LogicalOpPtr SFWQuery ::buildLogicalQueryPlan(map<string, MyDB_TablePtr> &allTab
   MyDB_SchemaPtr finalScheme = make_shared<MyDB_Schema>();
   attId = 0;
 
-  if (needAgg) {
+  if (needAgg)
+  {
     MyDB_Record intermediateRecord(aggScheme);
-    for (const auto &exprStr : finalSelections) {
+    for (const auto &exprStr : finalSelections)
+    {
       finalScheme->getAtts().emplace_back(finalTableAlias + "_" + to_string(attId), intermediateRecord.getType(exprStr));
       attId++;
     }
-  } else {
-    for (const auto &expr : valuesToSelect) {
+  }
+  else
+  {
+    for (const auto &expr : valuesToSelect)
+    {
       finalScheme->getAtts().emplace_back(finalTableAlias + "_" + to_string(attId), myRecord.getType(expr->toString()));
       attId++;
     }
@@ -377,27 +417,33 @@ LogicalOpPtr SFWQuery ::buildLogicalQueryPlan(map<string, MyDB_TablePtr> &allTab
   return final;
 }
 
-void SFWQuery ::print() {
+void SFWQuery ::print()
+{
   cout << "Selecting the following:\n";
-  for (auto a : valuesToSelect) {
+  for (auto a : valuesToSelect)
+  {
     cout << "\t" << a->toString() << "\n";
   }
   cout << "From the following:\n";
-  for (auto a : tablesToProcess) {
+  for (auto a : tablesToProcess)
+  {
     cout << "\t" << a.first << " AS " << a.second << "\n";
   }
   cout << "Where the following are true:\n";
-  for (auto a : allDisjunctions) {
+  for (auto a : allDisjunctions)
+  {
     cout << "\t" << a->toString() << "\n";
   }
   cout << "Group using:\n";
-  for (auto a : groupingClauses) {
+  for (auto a : groupingClauses)
+  {
     cout << "\t" << a->toString() << "\n";
   }
 }
 
 SFWQuery ::SFWQuery(struct ValueList *selectClause, struct FromList *fromClause,
-                    struct CNF *cnf, struct ValueList *grouping) {
+                    struct CNF *cnf, struct ValueList *grouping)
+{
   valuesToSelect = selectClause->valuesToCompute;
   tablesToProcess = fromClause->aliases;
   allDisjunctions = cnf->disjunctions;
@@ -405,13 +451,15 @@ SFWQuery ::SFWQuery(struct ValueList *selectClause, struct FromList *fromClause,
 }
 
 SFWQuery ::SFWQuery(struct ValueList *selectClause, struct FromList *fromClause,
-                    struct CNF *cnf) {
+                    struct CNF *cnf)
+{
   valuesToSelect = selectClause->valuesToCompute;
   tablesToProcess = fromClause->aliases;
   allDisjunctions = cnf->disjunctions;
 }
 
-SFWQuery ::SFWQuery(struct ValueList *selectClause, struct FromList *fromClause) {
+SFWQuery ::SFWQuery(struct ValueList *selectClause, struct FromList *fromClause)
+{
   valuesToSelect = selectClause->valuesToCompute;
   tablesToProcess = fromClause->aliases;
   allDisjunctions.push_back(make_shared<BoolLiteral>(true));
