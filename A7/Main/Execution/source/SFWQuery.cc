@@ -11,6 +11,18 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <iostream>
+#include <chrono>
+#include <ctime>
+#include <iomanip>
+
+#define DEBUG_MSG(str) do { \
+    auto now = std::chrono::system_clock::now(); \
+    auto now_c = std::chrono::system_clock::to_time_t(now); \
+    auto now_tm = std::localtime(&now_c); \
+    std::cerr << std::put_time(now_tm, "%T") << " (Houston Time) "; \
+    std::cerr << "DEBUG: " << __FILE__ << "(" << __LINE__ << "): " << str << std::endl; \
+} while (false)
 
 vector<pair<unordered_set<int>, unordered_set<int>>> generateSubsets(int n)
 {
@@ -222,6 +234,21 @@ void replace(string &s, string const &toReplace, string const &replaceWith)
 //
 LogicalOpPtr SFWQuery ::buildLogicalQueryPlan(map<string, MyDB_TablePtr> &allTables, map<string, MyDB_TableReaderWriterPtr> &allTableReaderWriters)
 {
+
+
+  cout << "groupingClauses: \n" << endl;
+  for (auto expr: groupingClauses) {
+    cout << expr->toString() << endl;
+  }
+  cout << "valuesToSelect: \n" << endl;
+  for (auto expr: valuesToSelect) {
+    cout << expr->toString() << endl;
+  }
+  cout << "allDisjunctions: \n" << endl;
+  for (auto expr: allDisjunctions) {
+    cout << expr->toString() << endl;
+  }
+
   this->allTables = allTables;
   this->allTableReaderWriters = allTableReaderWriters;
 
@@ -256,11 +283,13 @@ LogicalOpPtr SFWQuery ::buildLogicalQueryPlan(map<string, MyDB_TablePtr> &allTab
 
   string aggTableAlias = "agg";
 
+  // TODO: check if this is correct
   // extract expressions from group by clauses
   unordered_map<string, string> renameTable;
   int attId = 0;
   for (const auto &groupExpr : groupingClauses)
   {
+    DEBUG_MSG("groupExpr: " << groupExpr->toString());
     needAgg = true;
     string newName = "group_" + to_string(attId);
     aggScheme->getAtts().emplace_back(newName, myRecord.getType(groupExpr->toString()));
@@ -321,6 +350,7 @@ LogicalOpPtr SFWQuery ::buildLogicalQueryPlan(map<string, MyDB_TablePtr> &allTab
       replace(exprStr, renamedKeys, "[" + renameTable[renamedKeys] + "]");
     }
     finalSelections.push_back(exprStr);
+    DEBUG_MSG("finalSelections: " << exprStr);
   }
 
   bool needFinalSelection = true;
