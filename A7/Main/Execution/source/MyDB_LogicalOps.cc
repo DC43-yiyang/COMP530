@@ -144,58 +144,30 @@ tuple<MyDB_TableReaderWriterPtr, size_t> LogicalJoin ::execute()
     size_t cnt;
     auto maxPossiblePages = bufMgr->getMaxPossiblePages();
     auto leftAtts = leftInput->getTable()->getSchema()->getAtts();
-
-    if (leftInput->getNumPages() < maxPossiblePages || rightInput->getNumPages() < maxPossiblePages)
+    
+    pair<string, string> equalityCheck;
+    for (const auto &expr : outputSelectionPredicate)
     {
-        vector<pair<string, string>> equalityCheck;
-        for (const auto &expr : outputSelectionPredicate)
+        if (expr->getLHS() && expr->getRHS())
         {
-            if (expr->getLHS() && expr->getRHS())
-            {
-                auto pred1 = expr->getLHS()->toString();
-                auto pred2 = expr->getRHS()->toString();
-                pair<string, string> tmp;
-                if (any_of(leftAtts.begin(), leftAtts.end(), [&pred1](const pair<string, MyDB_AttTypePtr> &p)
-                           { return pred1.find(p.first) != string::npos; }))
-                    tmp = make_pair(pred1, pred2);
-                else
-                    tmp = make_pair(pred2, pred1);
-                equalityCheck.emplace_back(tmp);
-            }
+            auto pred1 = expr->getLHS()->toString();
+            auto pred2 = expr->getRHS()->toString();
+            if (any_of(leftAtts.begin(), leftAtts.end(), [&pred1](const pair<string, MyDB_AttTypePtr> &p)
+                        { return pred1.find(p.first) != string::npos; }))
+                equalityCheck = make_pair(pred1, pred2);
+            else
+                equalityCheck = make_pair(pred2, pred1);
+            break;
         }
-
-        size_t count = max(leftCount, rightCount);
-        ScanJoin joinPlan(leftInput, rightInput, output,
-                          finalPreds, projections, equalityCheck,
-                          "bool[true]", "bool[true]", count);
-        cnt = joinPlan.run();
     }
-    else
-    {
-        pair<string, string> equalityCheck;
-        for (const auto &expr : outputSelectionPredicate)
-        {
-            if (expr->getLHS() && expr->getRHS())
-            {
-                auto pred1 = expr->getLHS()->toString();
-                auto pred2 = expr->getRHS()->toString();
-                if (any_of(leftAtts.begin(), leftAtts.end(), [&pred1](const pair<string, MyDB_AttTypePtr> &p)
-                           { return pred1.find(p.first) != string::npos; }))
-                    equalityCheck = make_pair(pred1, pred2);
-                else
-                    equalityCheck = make_pair(pred2, pred1);
-                break;
-            }
-        }
-        auto pred1 = outputSelectionPredicate[0]->getLHS()->toString();
-        auto pred2 = outputSelectionPredicate[0]->getRHS()->toString();
+    auto pred1 = outputSelectionPredicate[0]->getLHS()->toString();
+    auto pred2 = outputSelectionPredicate[0]->getRHS()->toString();
 
-        SortMergeJoin joinPlan(leftInput, rightInput, output,
-                               finalPreds, projections, equalityCheck,
-                               "bool[true]", "bool[true]");
+    SortMergeJoin joinPlan(leftInput, rightInput, output,
+                            finalPreds, projections, equalityCheck,
+                            "bool[true]", "bool[true]");
 
-        cnt = joinPlan.run();
-    }
+    cnt = joinPlan.run();
 
     cout << output->getTable()->getName() << ": " << cnt << endl;
 
