@@ -22,7 +22,7 @@
         auto now = std::chrono::system_clock::now();                                        \
         auto now_c = std::chrono::system_clock::to_time_t(now);                             \
         auto now_tm = std::localtime(&now_c);                                               \
-        std::cerr << std::put_time(now_tm, "%T") << " (Houston Time) ";                     \
+        std::cerr << std::put_time(now_tm, "%T") << "  ";                     \
         std::cerr << "DEBUG: " << __FILE__ << "(" << __LINE__ << "): " << str << std::endl; \
     } while (false)
 
@@ -237,21 +237,18 @@ void replace(string &s, string const &toReplace, string const &replaceWith)
 LogicalOpPtr SFWQuery ::buildLogicalQueryPlan(map<string, MyDB_TablePtr> &allTables, map<string, MyDB_TableReaderWriterPtr> &allTableReaderWriters)
 {
 
-    cout << "groupingClauses: \n"
-         << endl;
-    for (auto expr : groupingClauses)
+    DEBUG_MSG("groupingClauses");
+    for (auto expr : this->groupingClauses)
     {
         cout << expr->toString() << endl;
     }
-    cout << "valuesToSelect: \n"
-         << endl;
-    for (auto expr : valuesToSelect)
+    DEBUG_MSG("valuesToSelec");
+    for (auto expr : this->valuesToSelect)
     {
         cout << expr->toString() << endl;
     }
-    cout << "allDisjunctions: \n"
-         << endl;
-    for (auto expr : allDisjunctions)
+    DEBUG_MSG("allDisjunctions");
+    for (auto expr : this->allDisjunctions)
     {
         cout << expr->toString() << endl;
     }
@@ -276,6 +273,7 @@ LogicalOpPtr SFWQuery ::buildLogicalQueryPlan(map<string, MyDB_TablePtr> &allTab
             tablesToProcess.erase(iter);
     }
 
+    DEBUG_MSG("tablesToProcess");
     LogicalOpPtr myOp = optimize(valuesToSelect, tablesToProcess, allDisjunctions, tablesToProcess.size());
     MyDB_SchemaPtr myScheme = finalScheme;
     MyDB_Record myRecord(myScheme);
@@ -290,7 +288,9 @@ LogicalOpPtr SFWQuery ::buildLogicalQueryPlan(map<string, MyDB_TablePtr> &allTab
 
     string aggTableAlias = "agg";
 
-    // TODO: check if this is correct
+    // ####################################################################################################
+    // ####################################################################################################
+    // ####################################################################################################
     // extract expressions from group by clauses
     unordered_map<string, string> renameTable;
     int attId = 0;
@@ -300,6 +300,7 @@ LogicalOpPtr SFWQuery ::buildLogicalQueryPlan(map<string, MyDB_TablePtr> &allTab
         needAgg = true;
         string newName = "group_" + to_string(attId);
         aggScheme->getAtts().emplace_back(newName, myRecord.getType(groupExpr->toString()));
+        DEBUG_MSG("groupExpr's newName: " << newName);
         renameTable[groupExpr->toString()] = newName;
         attId++;
     }
@@ -314,9 +315,11 @@ LogicalOpPtr SFWQuery ::buildLogicalQueryPlan(map<string, MyDB_TablePtr> &allTab
             if (renameTable.find(idExprStr) == renameTable.end())
             {
                 groupingClauses.push_back(idExpr);
+                DEBUG_MSG("idExpr: " << idExpr->toString());
                 assert(idExprStr.size() >= 2);
                 string newName = idExprStr.substr(1, idExprStr.size() - 2);
                 aggScheme->getAtts().emplace_back(newName, myRecord.getType(idExpr->toString()));
+                DEBUG_MSG("idExpr's newName: " << newName);
                 renameTable[idExprStr] = newName;
                 attId++;
             }
@@ -335,9 +338,11 @@ LogicalOpPtr SFWQuery ::buildLogicalQueryPlan(map<string, MyDB_TablePtr> &allTab
                 string aggExprStr = aggExpr->toString();
                 if (renameTable.find(aggExprStr) == renameTable.end())
                 {
+                    DEBUG_MSG("aggExpr: " << aggExpr->toString());
                     aggSelections.push_back(aggExpr);
                     string newName = aggExprStr.substr(0, 3) + "_" + to_string(attId);
                     aggScheme->getAtts().emplace_back(newName, myRecord.getType(aggExpr->toString()));
+                    DEBUG_MSG("aggExpr's newName: " << newName);
                     renameTable[aggExprStr] = newName;
                     attId++;
                 }
@@ -352,6 +357,7 @@ LogicalOpPtr SFWQuery ::buildLogicalQueryPlan(map<string, MyDB_TablePtr> &allTab
     for (auto &expr : valuesToSelect)
     {
         string exprStr = expr->toString();
+        DEBUG_MSG("before final selection expr: " << exprStr);
         for (const auto &renamedKeys : allRenamedKeys)
         {
             replace(exprStr, renamedKeys, "[" + renameTable[renamedKeys] + "]");
@@ -363,6 +369,7 @@ LogicalOpPtr SFWQuery ::buildLogicalQueryPlan(map<string, MyDB_TablePtr> &allTab
     bool needFinalSelection = true;
     if (needAgg)
     {
+        DEBUG_MSG("needAgg");
         bool allIdentical = true;
         if (finalSelections.size() == aggScheme->getAtts().size())
         {
@@ -373,18 +380,21 @@ LogicalOpPtr SFWQuery ::buildLogicalQueryPlan(map<string, MyDB_TablePtr> &allTab
                     allIdentical = false;
                     break;
                 }
+                DEBUG_MSG(" finalSelections[i]: " << finalSelections[i] << " aggScheme->getAtts()[i].first: " << aggScheme->getAtts()[i].first);
             }
         }
         else
         {
             allIdentical = false;
+            DEBUG_MSG("finalSelections.size() != aggScheme->getAtts().size(), then needFinalSelection");
+
         }
 
         needFinalSelection = !allIdentical;
     }
     else
     {
-
+        DEBUG_MSG("no needAgg");
         bool allIdentical = true;
         if (valuesToSelect.size() == myScheme->getAtts().size())
         {
